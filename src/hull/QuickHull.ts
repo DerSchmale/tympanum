@@ -1,9 +1,9 @@
 import { Vector } from "../types";
 import { dim, signedDistToPlane } from "../math/VecMath";
-import { removeElementOutOfOrder } from "../array/utils";
 import { Facet, Ridge } from "../geom/Geometry";
 import { createSimplex } from "../geom/Simplex";
 import { findNeighbor, generateFacetPlane } from "../geom/utils";
+import { removeElementOutOfOrder } from "@derschmale/array-utils";
 
 /**
  * Some meta-data while constructing the facets

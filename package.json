@@ -1,13 +1,12 @@
 {
   "name": "@derschmale/tympanum",
   "version": "1.0.0",
-  "main": "src/main.ts",
-  "module": "build/hx-core/tympanum.module.js",
+  "main": "build/tympanum.js",
+  "module": "build/tympanum.module.js",
   "files": [
-    "build/**/*.js",
+    "build/**/*",
     "README.md",
-    "LICENSE",
-    "src"
+    "LICENSE"
   ],
   "repository": {
     "type": "git",
@@ -17,8 +16,11 @@
     "build": "rollup -c"
   },
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "@derschmale/array-utils": "^1.0.2"
+  },
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^11.0.1",
     "@types/chai": "^4.2.14",
     "@types/mocha": "^8.2.0",
     "chai": "^4.2.0",
@@ -34,4 +36,5 @@
     "3d",
     "geometry",
     "hull"
-  ]}
+  ]
+}

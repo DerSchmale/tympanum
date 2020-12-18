@@ -134,22 +134,6 @@ var TYMP = (function (exports) {
         return d;
     }
 
-    function removeElementOutOfOrder(target, elm) {
-        var last = target.pop();
-        if (last === elm) {
-            return target.length;
-        }
-        else {
-            var index = target.indexOf(elm);
-            if (index === -1) {
-                target.push(last);
-                throw new Error("Removing component that's not present");
-            }
-            target[index] = last;
-            return index;
-        }
-    }
-
     var Ridge = /** @class */ (function () {
         function Ridge(facet) {
             this.verts = [];
@@ -256,6 +240,25 @@ var TYMP = (function (exports) {
             facets.push(f);
         }
         return facets;
+    }
+
+    /**
+     * Randomizes the order of the elements in the array.
+     */
+    function removeElementOutOfOrder(target, elm) {
+        var last = target.pop();
+        if (last === elm) {
+            return target.length;
+        }
+        else {
+            var index = target.indexOf(elm);
+            if (index === -1) {
+                target.push(last);
+                throw new Error("Removing component that's not present");
+            }
+            target[index] = last;
+            return index;
+        }
     }
 
     /**

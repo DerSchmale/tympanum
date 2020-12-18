@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "module": "esNext",
+    "esModuleInterop": true,
+    "target": "es5",
+    "sourceMap": true,
+    "declaration": true,
+    "allowJs": true,
+    "declarationDir": "build/types/",
+    "moduleResolution": "node",
+    "lib": [
+      "es5",
+      "dom",
+      "ES2015.Promise",
+      "ES2015.Collection",
+      "ES2015.Iterable"
+    ]
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    "test"
+  ]
+}
