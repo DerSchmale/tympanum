@@ -2,12 +2,6 @@ import { Vector } from "../types";
 import { dim, hyperplaneFromPoints, negate, signedDistToPlane } from "../math/VecMath";
 import { removeElementOutOfOrder } from "../array/utils";
 
-export type Face =
-    {
-        verts: number[];
-        plane: Vector;
-    };
-
 class Ridge
 {
     verts: number[] = [];
@@ -269,7 +263,7 @@ function connectHorizonRidges(points: Vector[], index: number, H: Ridge[], centr
  *
  * @author derschmale <http://www.derschmale.com>
  */
-export function quickHull(points: Vector[]): Face[]
+export function quickHull(points: Vector[]): Facet[]
 {
     if (points.length === 0) return;
     const d = dim(points[0]);
@@ -331,20 +325,5 @@ export function quickHull(points: Vector[]): Face[]
         }
     }
 
-    return facets.map(f =>
-    {
-        const verts = f.ridges[0].verts.slice();
-        const plane = f.plane;
-        const len = f.ridges.length;
-
-        for (let i = 1; i < len; ++i) {
-            let v = f.ridges[i].verts;
-            verts.push(v[v.length - 1]);
-        }
-
-        return {
-            verts,
-            plane
-        };
-    });
+    return facets
 }

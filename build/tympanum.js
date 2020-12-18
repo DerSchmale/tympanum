@@ -401,19 +401,7 @@ var TYMP = (function (exports) {
                 }
             }
         }
-        return facets.map(function (f) {
-            var verts = f.ridges[0].verts.slice();
-            var plane = f.plane;
-            var len = f.ridges.length;
-            for (var i = 1; i < len; ++i) {
-                var v = f.ridges[i].verts;
-                verts.push(v[v.length - 1]);
-            }
-            return {
-                verts: verts,
-                plane: plane
-            };
-        });
+        return facets;
     }
 
     exports.quickHull = quickHull;
