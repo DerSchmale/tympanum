@@ -159,27 +159,37 @@ var TYMP = (function (exports) {
     }());
     var Facet = /** @class */ (function () {
         function Facet() {
-            this.outsideSet = [];
-            this.outsideDist = [];
             this.ridges = [];
         }
-        Facet.prototype.getFurthestPoint = function () {
-            var _a = this, outsideSet = _a.outsideSet, outsideDist = _a.outsideDist;
-            var len = outsideSet.length;
-            if (len === 0)
-                return -1;
-            var p = outsideSet[0];
-            var dist = outsideDist[0];
-            for (var i = 1; i < len; ++i) {
-                if (outsideDist[i] > dist) {
-                    dist = outsideDist[i];
-                    p = outsideSet[i];
-                }
-            }
-            return p;
-        };
         return Facet;
     }());
+    var FacetInfo = /** @class */ (function () {
+        function FacetInfo() {
+            this.outsideSet = [];
+            this.outsideDist = [];
+        }
+        return FacetInfo;
+    }());
+    function createFacet() {
+        var f = new Facet();
+        f.meta = new FacetInfo();
+        return f;
+    }
+    function getFurthestPoint(facet) {
+        var _a = facet.meta, outsideSet = _a.outsideSet, outsideDist = _a.outsideDist;
+        var len = outsideSet.length;
+        if (len === 0)
+            return -1;
+        var p = outsideSet[0];
+        var dist = outsideDist[0];
+        for (var i = 1; i < len; ++i) {
+            if (outsideDist[i] > dist) {
+                dist = outsideDist[i];
+                p = outsideSet[i];
+            }
+        }
+        return p;
+    }
     function generatePlane(f, points, centroid) {
         var verts = f.ridges.map(function (r) { return points[r.verts[0]]; });
         var plane = f.plane = hyperplaneFromPoints(verts);
@@ -256,7 +266,7 @@ var TYMP = (function (exports) {
         //  3D: 2 vertices to an edge
         var verts = [];
         for (var i = 0; i <= dim; ++i) {
-            var f = new Facet();
+            var f = createFacet();
             // collect all verts for this facet
             for (var v = 0; v < dim; ++v) {
                 verts[v] = (i + v) % numVerts;
@@ -288,8 +298,9 @@ var TYMP = (function (exports) {
                 var f = facets_2[_i];
                 var dist = signedDistToPlane(p, f.plane);
                 if (dist > 0) {
-                    f.outsideSet.push(index);
-                    f.outsideDist.push(dist);
+                    var meta = f.meta;
+                    meta.outsideSet.push(index);
+                    meta.outsideDist.push(dist);
                     break;
                 }
             }
@@ -299,12 +310,12 @@ var TYMP = (function (exports) {
     }
     function getVisibleSet(p, facet, visible, horizon) {
         visible.push(facet);
-        facet.currentPoint = p;
+        facet.meta.currentPoint = p;
         for (var _i = 0, _a = facet.ridges; _i < _a.length; _i++) {
             var r = _a[_i];
             var neighbor = r.neighbor.facet;
             // already checked
-            if (neighbor.currentPoint === p)
+            if (neighbor.meta.currentPoint === p)
                 continue;
             if (signedDistToPlane(p, neighbor.plane) > 0.0)
                 getVisibleSet(p, neighbor, visible, horizon);
@@ -314,7 +325,7 @@ var TYMP = (function (exports) {
     }
     function attachNewFacet(ridge, p, points, facets, centroid, dim) {
         // in 2D, we simply need to create 1 new facet (line) from old ridge to p
-        var newFacet = new Facet();
+        var newFacet = createFacet();
         // collect all verts for this facet, which is the horizon ridge + this point
         var verts = ridge.verts.slice();
         verts.push(p);
@@ -382,9 +393,9 @@ var TYMP = (function (exports) {
             done = true;
             for (var i = 0; i < facets.length; ++i) {
                 var facet = facets[i];
-                var p = facet.getFurthestPoint();
+                var p = getFurthestPoint(facet);
                 if (p !== -1) {
-                    removeElementOutOfOrder(facet.outsideSet, p);
+                    removeElementOutOfOrder(facet.meta.outsideSet, p);
                     var V = [];
                     var H = [];
                     getVisibleSet(points[p], facet, V, H);
@@ -393,14 +404,15 @@ var TYMP = (function (exports) {
                         var v = V_1[_i];
                         if (removeElementOutOfOrder(facets, v) <= i)
                             --i;
-                        generateOutsideSets(v.outsideSet, points, newFacets);
-                        if (v.outsideSet.length > 0)
+                        generateOutsideSets(v.meta.outsideSet, points, newFacets);
+                        if (v.meta.outsideSet.length > 0)
                             done = false;
                     }
                     facets.push.apply(facets, newFacets);
                 }
             }
         }
+        facets.forEach(function (f) { return f.meta = null; });
         return facets;
     }
 

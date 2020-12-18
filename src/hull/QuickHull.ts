@@ -1,50 +1,40 @@
 import { Vector } from "../types";
 import { dim, hyperplaneFromPoints, negate, signedDistToPlane } from "../math/VecMath";
 import { removeElementOutOfOrder } from "../array/utils";
+import { Facet, Ridge } from "../geom/Geometry";
 
-class Ridge
-{
-    verts: number[] = [];
-    neighbor: Ridge;
-    facet: Facet;
-
-    constructor(facet: Facet)
-    {
-        this.facet = facet;
-    }
-}
-
-class Facet
+class FacetInfo
 {
     outsideSet: number[] = [];
     outsideDist: number[] = [];
-    ridges: Ridge[] = [];
-    plane: Vector;
     currentPoint: Vector;   // used to keep track of visibility tests
+}
 
-    constructor()
-    {
-    }
+function createFacet(): Facet
+{
+    const f = new Facet();
+    f.meta = new FacetInfo();
+    return f;
+}
 
-    getFurthestPoint(): number
-    {
-        const { outsideSet, outsideDist } = this;
-        const len = outsideSet.length;
+function getFurthestPoint(facet: Facet): number
+{
+    const { outsideSet, outsideDist } = facet.meta;
+    const len = outsideSet.length;
 
-        if (len === 0) return -1;
+    if (len === 0) return -1;
 
-        let p = outsideSet[0];
-        let dist = outsideDist[0];
+    let p = outsideSet[0];
+    let dist = outsideDist[0];
 
-        for (let i = 1; i < len; ++i) {
-            if (outsideDist[i] > dist) {
-                dist = outsideDist[i];
-                p = outsideSet[i];
-            }
+    for (let i = 1; i < len; ++i) {
+        if (outsideDist[i] > dist) {
+            dist = outsideDist[i];
+            p = outsideSet[i];
         }
-
-        return p;
     }
+
+    return p;
 }
 
 function generatePlane(f: Facet, points: Vector[], centroid: Vector): void
@@ -136,7 +126,7 @@ function createSimplex(points: Vector[], dim: number, centroid: Vector): Facet[]
     let verts = [];
 
     for (let i = 0; i <= dim; ++i) {
-        let f = new Facet();
+        let f = createFacet();
 
         // collect all verts for this facet
         for (let v = 0; v < dim; ++v) {
@@ -180,8 +170,9 @@ function generateOutsideSets(indices: number[], points: Vector[], facets: Facet[
             let dist = signedDistToPlane(p, f.plane);
 
             if (dist > 0) {
-                f.outsideSet.push(index);
-                f.outsideDist.push(dist);
+                const meta = f.meta;
+                meta.outsideSet.push(index);
+                meta.outsideDist.push(dist);
                 break;
             }
         }
@@ -194,13 +185,13 @@ function generateOutsideSets(indices: number[], points: Vector[], facets: Facet[
 function getVisibleSet(p: Vector, facet: Facet, visible: Facet[], horizon: Ridge[])
 {
     visible.push(facet);
-    facet.currentPoint = p;
+    facet.meta.currentPoint = p;
 
     for (let r of facet.ridges) {
         const neighbor = r.neighbor.facet;
 
         // already checked
-        if (neighbor.currentPoint === p) continue;
+        if (neighbor.meta.currentPoint === p) continue;
 
         if (signedDistToPlane(p, neighbor.plane) > 0.0)
             getVisibleSet(p, neighbor, visible, horizon);
@@ -212,7 +203,7 @@ function getVisibleSet(p: Vector, facet: Facet, visible: Facet[], horizon: Ridge
 function attachNewFacet(ridge: Ridge, p: number, points: Vector[], facets: Facet[], centroid: Vector, dim: number): Facet
 {
     // in 2D, we simply need to create 1 new facet (line) from old ridge to p
-    const newFacet = new Facet();
+    const newFacet = createFacet();
 
     // collect all verts for this facet, which is the horizon ridge + this point
     const verts = ridge.verts.slice();
@@ -302,9 +293,9 @@ export function quickHull(points: Vector[]): Facet[]
         for (let i = 0; i < facets.length; ++i) {
             const facet = facets[i];
 
-            const p = facet.getFurthestPoint();
+            const p = getFurthestPoint(facet);
             if (p !== -1) {
-                removeElementOutOfOrder(facet.outsideSet, p);
+                removeElementOutOfOrder(facet.meta.outsideSet, p);
 
                 const V = [];
                 const H = [];
@@ -315,8 +306,8 @@ export function quickHull(points: Vector[]): Facet[]
 
                 for (let v of V) {
                     if (removeElementOutOfOrder(facets, v) <= i) --i;
-                    generateOutsideSets(v.outsideSet, points, newFacets);
-                    if (v.outsideSet.length > 0)
+                    generateOutsideSets(v.meta.outsideSet, points, newFacets);
+                    if (v.meta.outsideSet.length > 0)
                         done = false;
                 }
 
@@ -325,5 +316,7 @@ export function quickHull(points: Vector[]): Facet[]
         }
     }
 
-    return facets
+    facets.forEach(f => f.meta = null);
+
+    return facets;
 }
