@@ -1,5 +1,7 @@
 # Tympanum
-A Typescript library for multidimensional geometry code.
+
+A Typescript library for multidimensional geometry code. There's not much in it, but may grow slightly as I need more
+functionality.
 
 # Examples:
 
