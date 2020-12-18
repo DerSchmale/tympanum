@@ -1,3 +1,5 @@
+import {quickHull} from "../../build/tympanum.module.js";
+
 (() => {
     window.onresize = draw;
     window.onload = init;
@@ -44,7 +46,7 @@
         }
 
         let time = performance.now();
-        hull = TYMP.quickHull(points);
+        hull = quickHull(points);
 
         time = performance.now() - time;
         console.log("Time to generate hull: " + time.toFixed(2) + "ms");
