@@ -163,44 +163,15 @@ var TYMP = (function (exports) {
         }
         return Facet;
     }());
-    var FacetInfo = /** @class */ (function () {
-        function FacetInfo() {
-            this.outsideSet = [];
-            this.outsideDist = [];
-        }
-        return FacetInfo;
-    }());
-    function createFacet() {
-        var f = new Facet();
-        f.meta = new FacetInfo();
-        return f;
-    }
-    function getFurthestPoint(facet) {
-        var _a = facet.meta, outsideSet = _a.outsideSet, outsideDist = _a.outsideDist;
-        var len = outsideSet.length;
-        if (len === 0)
-            return -1;
-        var p = outsideSet[0];
-        var dist = outsideDist[0];
-        for (var i = 1; i < len; ++i) {
-            if (outsideDist[i] > dist) {
-                dist = outsideDist[i];
-                p = outsideSet[i];
-            }
-        }
-        return p;
-    }
-    function generatePlane(f, points, centroid) {
-        var verts = f.ridges.map(function (r) { return points[r.verts[0]]; });
-        var plane = f.plane = hyperplaneFromPoints(verts);
-        // use an opposing point, which MUST be on the negative side of the plane
-        if (signedDistToPlane(centroid, plane) > 0.0) {
-            negate(plane);
-            // flip ridges for consistency
-            f.ridges.reverse();
-            f.ridges.forEach(function (r) { return r.verts.reverse(); });
-        }
-    }
+
+    // only used internally
+    /**
+     * Assign the neighbor from a set. Generally only used while constructing a new facet.
+     *
+     * @param facet The facet owning the ridge.
+     * @param ridge The ridge for which to find the neighbor.
+     * @param facets The set of facets to search.
+     */
     function findNeighbor(facet, ridge, facets) {
         var src = ridge.verts;
         var len = src.length;
@@ -227,47 +198,46 @@ var TYMP = (function (exports) {
             }
         }
     }
-    function createSimplex(points, dim, centroid) {
-        // construct facets from dim+1 points
-        // 1D: [ [0], [1] ]
-        // 2D: the set of 1D simplex facets for points 0, 1, 2
-        //        [ [0, 1], [1, 2], [2, 0] ]
-        // 3D: the set of 2D simplex facets for points 0, 1, 2, 3
-        //    [
-        //        [0, 1, 2]
-        //        [1, 2, 3]
-        //        [2, 3, 0]
-        //        [3, 0, 2]
-        //    ]
-        // 4D: the set of 3D simplices facets for points 0, 1, 2, 3, 4
-        //    [
-        //        [0, 1, 2, 3]
-        //        [1, 2, 3, 4]
-        //        [2, 3, 4, 0]
-        //        [3, 4, 0, 1]
-        //        [4, 0, 1, 2]
-        //    ]
+    /**
+     * Generates a plane for a facet. Used when constructing new facets.
+     * @param facet The facet to construct a new plane for.
+     * @param points The general set of points the indices refer to.
+     * @param centroid An optional point that's guaranteed to be behind the plane. This can be used to orient the face
+     * if the vertex order is inconsistent.
+     */
+    function generateFacetPlane(facet, points, centroid) {
+        var verts = facet.ridges.map(function (r) { return points[r.verts[0]]; });
+        var plane = facet.plane = hyperplaneFromPoints(verts);
+        if (centroid && signedDistToPlane(centroid, plane) > 0.0) {
+            negate(plane);
+            // flip ridges for consistency
+            facet.ridges.reverse();
+            for (var _i = 0, _a = facet.ridges; _i < _a.length; _i++) {
+                var r = _a[_i];
+                r.verts.reverse();
+            }
+        }
+    }
+
+    /**
+     * Creates an N-simplex from N+1 points.
+     *
+     * @param points An array of points. Only the first N+1 points are used
+     * @param dim The dimension of the simplex
+     */
+    function createSimplex(points, dim) {
         // TODO: We can find a better initial data set, similar to QHull:
         //  find the minX, maxX points, and iteratively extend with furthest point
         //  (starts with signed dist to line, then to plane in 3D, then to hyperplane in 4D)
-        //  This is the same sort of logic of the base Quickhull algorithm, so maybe it's not that much of an improvement
+        //  This is the same sort of logic of the base Quickhull algorithm, so maybe it's not that much of an
+        //  improvement to do it in the first step?
         var facets = [];
-        // the facet is made up of dim + 1 points, so cycle through these
         var numVerts = dim + 1;
-        // Dimension of simplex = dim
-        // Number of facets = dim + 1
-        //  2D: 3 lines to a triangle
-        //  3D: 4 triangles to a tetrahedron
-        // Number of ridges per facet = dim
-        //  2D: 2 vertices to a segment
-        //  3D: 3 edges to a triangle
-        // Number of vertices per ridge = dim - 1
-        //  2D: 1 point per vertex
-        //  3D: 2 vertices to an edge
         var verts = [];
         for (var i = 0; i <= dim; ++i) {
-            var f = createFacet();
+            var f = new Facet();
             // collect all verts for this facet
+            // the facet is made up of dim + 1 points, so cycle through these
             for (var v = 0; v < dim; ++v) {
                 verts[v] = (i + v) % numVerts;
             }
@@ -280,11 +250,38 @@ var TYMP = (function (exports) {
                 // there's probably an analytical way to do this
                 findNeighbor(f, ridge, facets);
             }
-            // we need dim + 1 points
-            generatePlane(f, points, centroid);
+            // an opposing face to ensure correct direction
+            var opposing = points[(i + dim) % (dim + 1)];
+            generateFacetPlane(f, points, opposing);
             facets.push(f);
         }
         return facets;
+    }
+
+    /**
+     * Some meta-data while constructing the facets
+     */
+    var FacetInfo = /** @class */ (function () {
+        function FacetInfo() {
+            this.outsideSet = [];
+            this.outsideDist = [];
+        }
+        return FacetInfo;
+    }());
+    function getFurthestPoint(facet) {
+        var _a = facet.meta, outsideSet = _a.outsideSet, outsideDist = _a.outsideDist;
+        var len = outsideSet.length;
+        if (len === 0)
+            return -1;
+        var p = outsideSet[0];
+        var dist = outsideDist[0];
+        for (var i = 1; i < len; ++i) {
+            if (outsideDist[i] > dist) {
+                dist = outsideDist[i];
+                p = outsideSet[i];
+            }
+        }
+        return p;
     }
     // [face][setIndex][0/1] : 0 = index, 1 = signed distance to facet plane
     // assign points to the outside set of a collection of faces
@@ -294,8 +291,8 @@ var TYMP = (function (exports) {
         for (var i = 0; i < len; ++i) {
             var index = indices[i];
             var p = points[index];
-            for (var _i = 0, facets_2 = facets; _i < facets_2.length; _i++) {
-                var f = facets_2[_i];
+            for (var _i = 0, facets_1 = facets; _i < facets_1.length; _i++) {
+                var f = facets_1[_i];
                 var dist = signedDistToPlane(p, f.plane);
                 if (dist > 0) {
                     var meta = f.meta;
@@ -325,7 +322,8 @@ var TYMP = (function (exports) {
     }
     function attachNewFacet(ridge, p, points, facets, centroid, dim) {
         // in 2D, we simply need to create 1 new facet (line) from old ridge to p
-        var newFacet = createFacet();
+        var newFacet = new Facet();
+        newFacet.meta = new FacetInfo();
         // collect all verts for this facet, which is the horizon ridge + this point
         var verts = ridge.verts.slice();
         verts.push(p);
@@ -343,7 +341,7 @@ var TYMP = (function (exports) {
             findNeighbor(newFacet, ridge_1, facets);
             newFacet.ridges.push(ridge_1);
         }
-        generatePlane(newFacet, points, centroid);
+        generateFacetPlane(newFacet, points, centroid);
         return newFacet;
     }
     function connectHorizonRidges(points, index, H, centroid, dim) {
@@ -355,6 +353,17 @@ var TYMP = (function (exports) {
             newFacets.push(newFacet);
         }
         return newFacets;
+    }
+    function createCentroid(points, d) {
+        // a point that will be internal from the very first simplex. Used to correctly orient new planes
+        var centroid = points[0].slice();
+        for (var j = 0; j < d; ++j) {
+            for (var i = 1; i <= d; ++i) {
+                centroid[j] += points[i][j];
+            }
+            centroid[j] /= d + 1;
+        }
+        return centroid;
     }
     /**
      * QuickHull implements the algorithm of the same name, based on the original paper by Barber, Dobkin and Huhdanpaa.
@@ -371,20 +380,16 @@ var TYMP = (function (exports) {
         if (points.length <= d) {
             console.log("A convex hull in " + d + " dimensions requires at least " + (d + 1) + " points.");
         }
-        // a point that will be internal from the very first simplex. Used to correctly orient new planes
-        var centroid = points[0].slice();
-        for (var j = 0; j < d; ++j) {
-            for (var i = 1; i <= d; ++i) {
-                centroid[j] += points[i][j];
-            }
-            centroid[j] /= d + 1;
+        var facets = createSimplex(points, d);
+        for (var _i = 0, facets_2 = facets; _i < facets_2.length; _i++) {
+            var f = facets_2[_i];
+            f.meta = new FacetInfo();
         }
-        var facets = createSimplex(points, d, centroid);
+        var centroid = createCentroid(points, d);
         // initial unprocessed point indices:
         var indices = [];
-        for (var i = d + 1; i < points.length; ++i) {
+        for (var i = d + 1; i < points.length; ++i)
             indices.push(i);
-        }
         generateOutsideSets(indices, points, facets);
         // do not cache facets.length, as it will keep changing
         var done = false;
@@ -400,8 +405,8 @@ var TYMP = (function (exports) {
                     var H = [];
                     getVisibleSet(points[p], facet, V, H);
                     var newFacets = connectHorizonRidges(points, p, H, centroid, d);
-                    for (var _i = 0, V_1 = V; _i < V_1.length; _i++) {
-                        var v = V_1[_i];
+                    for (var _a = 0, V_1 = V; _a < V_1.length; _a++) {
+                        var v = V_1[_a];
                         if (removeElementOutOfOrder(facets, v) <= i)
                             --i;
                         generateOutsideSets(v.meta.outsideSet, points, newFacets);
@@ -412,10 +417,16 @@ var TYMP = (function (exports) {
                 }
             }
         }
-        facets.forEach(function (f) { return f.meta = null; });
+        for (var _b = 0, facets_3 = facets; _b < facets_3.length; _b++) {
+            var f = facets_3[_b];
+            f.meta = null;
+        }
         return facets;
     }
 
+    exports.Facet = Facet;
+    exports.Ridge = Ridge;
+    exports.createSimplex = createSimplex;
     exports.quickHull = quickHull;
 
     Object.defineProperty(exports, '__esModule', { value: true });

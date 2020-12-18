@@ -1,5 +1,5 @@
 {
-  "name": "@helix3d/tympanum",
+  "name": "@derschmale/tympanum",
   "version": "1.0.0",
   "main": "src/main.ts",
   "module": "build/hx-core/tympanum.module.js",
@@ -19,7 +19,6 @@
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
-    "@rollup/plugin-json": "^4.1.0",
     "@types/chai": "^4.2.14",
     "@types/mocha": "^8.2.0",
     "chai": "^4.2.0",

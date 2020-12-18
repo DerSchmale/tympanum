@@ -1,20 +1,18 @@
 import { Vector } from "../types";
-import { dim, hyperplaneFromPoints, negate, signedDistToPlane } from "../math/VecMath";
+import { dim, signedDistToPlane } from "../math/VecMath";
 import { removeElementOutOfOrder } from "../array/utils";
 import { Facet, Ridge } from "../geom/Geometry";
+import { createSimplex } from "../geom/Simplex";
+import { findNeighbor, generateFacetPlane } from "../geom/utils";
 
+/**
+ * Some meta-data while constructing the facets
+ */
 class FacetInfo
 {
     outsideSet: number[] = [];
     outsideDist: number[] = [];
     currentPoint: Vector;   // used to keep track of visibility tests
-}
-
-function createFacet(): Facet
-{
-    const f = new Facet();
-    f.meta = new FacetInfo();
-    return f;
 }
 
 function getFurthestPoint(facet: Facet): number
@@ -35,124 +33,6 @@ function getFurthestPoint(facet: Facet): number
     }
 
     return p;
-}
-
-function generatePlane(f: Facet, points: Vector[], centroid: Vector): void
-{
-    const verts = f.ridges.map(r => points[r.verts[0]]);
-
-    let plane = f.plane = hyperplaneFromPoints(verts);
-    // use an opposing point, which MUST be on the negative side of the plane
-
-    if (signedDistToPlane(centroid, plane) > 0.0) {
-        negate(plane);
-        // flip ridges for consistency
-        f.ridges.reverse();
-        f.ridges.forEach(r => r.verts.reverse());
-    }
-}
-
-function findNeighbor(facet: Facet, ridge: Ridge, facets: Facet[]): void
-{
-    const src = ridge.verts;
-    const len = src.length;
-
-    for (let f of facets) {
-        for (let r of f.ridges) {
-            // do not bother if we already found them
-            if (r.neighbor) continue;
-
-            let index = r.verts.indexOf(src[0]);
-            let found = index >= 0;
-            let i = 1;
-
-            while (found && i < len) {
-                index = (index + 1) % len;
-                found = (r.verts[index]) == src[i];
-                ++i;
-            }
-
-            if (found) {
-                ridge.neighbor = r;
-                r.neighbor = ridge;
-                return;
-            }
-        }
-    }
-}
-
-function createSimplex(points: Vector[], dim: number, centroid: Vector): Facet[]
-{
-    // construct facets from dim+1 points
-    // 1D: [ [0], [1] ]
-    // 2D: the set of 1D simplex facets for points 0, 1, 2
-    //        [ [0, 1], [1, 2], [2, 0] ]
-    // 3D: the set of 2D simplex facets for points 0, 1, 2, 3
-    //    [
-    //        [0, 1, 2]
-    //        [1, 2, 3]
-    //        [2, 3, 0]
-    //        [3, 0, 2]
-    //    ]
-    // 4D: the set of 3D simplices facets for points 0, 1, 2, 3, 4
-    //    [
-    //        [0, 1, 2, 3]
-    //        [1, 2, 3, 4]
-    //        [2, 3, 4, 0]
-    //        [3, 4, 0, 1]
-    //        [4, 0, 1, 2]
-    //    ]
-
-    // TODO: We can find a better initial data set, similar to QHull:
-    //  find the minX, maxX points, and iteratively extend with furthest point
-    //  (starts with signed dist to line, then to plane in 3D, then to hyperplane in 4D)
-    //  This is the same sort of logic of the base Quickhull algorithm, so maybe it's not that much of an improvement
-
-    const facets: Facet[] = [];
-    // the facet is made up of dim + 1 points, so cycle through these
-    const numVerts = dim + 1;
-
-    // Dimension of simplex = dim
-    // Number of facets = dim + 1
-    //  2D: 3 lines to a triangle
-    //  3D: 4 triangles to a tetrahedron
-    // Number of ridges per facet = dim
-    //  2D: 2 vertices to a segment
-    //  3D: 3 edges to a triangle
-    // Number of vertices per ridge = dim - 1
-    //  2D: 1 point per vertex
-    //  3D: 2 vertices to an edge
-
-    let verts = [];
-
-    for (let i = 0; i <= dim; ++i) {
-        let f = createFacet();
-
-        // collect all verts for this facet
-        for (let v = 0; v < dim; ++v) {
-            verts[v] = (i + v) % numVerts;
-        }
-
-        for (let r = 0; r < dim; ++r) {
-
-            let ridge = f.ridges[r] = new Ridge(f);
-
-            for (let v = 0; v < dim - 1; ++v) {
-                ridge.verts[v] = verts[(r + v) % dim];
-            }
-
-            // find neighbours from already generated sets
-            // there's probably an analytical way to do this
-            findNeighbor(f, ridge, facets);
-        }
-
-        // we need dim + 1 points
-        generatePlane(f, points, centroid);
-
-        facets.push(f);
-    }
-
-    return facets;
 }
 
 // [face][setIndex][0/1] : 0 = index, 1 = signed distance to facet plane
@@ -203,7 +83,8 @@ function getVisibleSet(p: Vector, facet: Facet, visible: Facet[], horizon: Ridge
 function attachNewFacet(ridge: Ridge, p: number, points: Vector[], facets: Facet[], centroid: Vector, dim: number): Facet
 {
     // in 2D, we simply need to create 1 new facet (line) from old ridge to p
-    const newFacet = createFacet();
+    const newFacet = new Facet();
+    newFacet.meta = new FacetInfo();
 
     // collect all verts for this facet, which is the horizon ridge + this point
     const verts = ridge.verts.slice();
@@ -228,7 +109,7 @@ function attachNewFacet(ridge: Ridge, p: number, points: Vector[], facets: Facet
         newFacet.ridges.push(ridge);
     }
 
-    generatePlane(newFacet, points, centroid);
+    generateFacetPlane(newFacet, points, centroid);
 
     return newFacet;
 }
@@ -244,6 +125,21 @@ function connectHorizonRidges(points: Vector[], index: number, H: Ridge[], centr
     }
 
     return newFacets;
+}
+
+function createCentroid(points: Vector[], d: number): Vector
+{
+    // a point that will be internal from the very first simplex. Used to correctly orient new planes
+    const centroid = points[0].slice();
+
+    for (let j = 0; j < d; ++j) {
+        for (let i = 1; i <= d; ++i) {
+            centroid[j] += points[i][j];
+        }
+        centroid[j] /= d + 1;
+    }
+
+    return centroid;
 }
 
 /**
@@ -263,24 +159,16 @@ export function quickHull(points: Vector[]): Facet[]
         console.log(`A convex hull in ${d} dimensions requires at least ${d + 1} points.`);
     }
 
-    // a point that will be internal from the very first simplex. Used to correctly orient new planes
-    const centroid = points[0].slice();
+    const facets = createSimplex(points, d);
+    for (let f of facets)
+        f.meta = new FacetInfo();
 
-    for (let j = 0; j < d; ++j) {
-        for (let i = 1; i <= d; ++i) {
-            centroid[j] += points[i][j];
-        }
-        centroid[j] /= d + 1;
-    }
-
-    const facets = createSimplex(points, d, centroid);
+    const centroid = createCentroid(points, d);
 
     // initial unprocessed point indices:
     const indices = [];
-
-    for (let i = d + 1; i < points.length; ++i) {
+    for (let i = d + 1; i < points.length; ++i)
         indices.push(i);
-    }
 
     generateOutsideSets(indices, points, facets);
 
@@ -316,7 +204,8 @@ export function quickHull(points: Vector[]): Facet[]
         }
     }
 
-    facets.forEach(f => f.meta = null);
+    for (let f of facets)
+        f.meta = null;
 
     return facets;
 }
