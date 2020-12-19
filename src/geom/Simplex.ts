@@ -7,10 +7,11 @@ import { findNeighbor, generateFacetPlane } from "./utils";
  *
  * @param points An array of points. Only the first N+1 points are used.
  * @param dim The dimension of the simplex.
+ * @param indices An optional array of indices into points to remap which points are used
  *
  * @author derschmale <http://www.derschmale.com>
  */
-export function createSimplex(points: Vector[], dim: number): Facet[]
+export function createSimplex(points: Vector[], dim: number, indices?: number[]): Facet[]
 {
     // TODO: We can find a better initial data set, similar to QHull:
     //  find the minX, maxX points, and iteratively extend with furthest point
@@ -29,7 +30,8 @@ export function createSimplex(points: Vector[], dim: number): Facet[]
         // collect all verts for this facet
         // the facet is made up of dim + 1 points, so cycle through these
         for (let v = 0; v < dim; ++v) {
-            verts[v] = (i + v) % numVerts;
+            const index = (i + v) % numVerts;
+            verts[v] = indices? indices[index] : index;
         }
 
         for (let r = 0; r < dim; ++r) {
@@ -46,8 +48,9 @@ export function createSimplex(points: Vector[], dim: number): Facet[]
         }
 
         // an opposing face to ensure correct direction
-        const opposing = points[(i + dim) % (dim + 1)];
-        generateFacetPlane(f, points, opposing);
+        const index = (i + dim) % (dim + 1);
+        const opposing = points[indices? indices[index] : index];
+        generateFacetPlane(f, points, dim, opposing);
 
         facets.push(f);
     }

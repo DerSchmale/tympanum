@@ -1,11 +1,11 @@
-import {quickHull} from "../../build/tympanum.module.js";
+import {delaunay} from "../../build/tympanum.module.js";
 
 (() => {
     window.onload = init;
     document.addEventListener("click", generate);
 
     let drawing;
-    let hull;
+    let triangulation;
     let points;
 
     function init()
@@ -18,15 +18,7 @@ import {quickHull} from "../../build/tympanum.module.js";
     {
         points = [];
 
-        /*for (let i = 0; i < 1000; ++i) {
-            let ang = Math.random() * Math.PI * 2.0;
-            let rad = Math.random();
-            rad *= Math.sin(ang / 10.0);
-            rad *= rad * 6;
-            points[i] = [Math.cos(ang) * rad - 0.5, Math.sin(ang) * rad + 0.3];
-        }*/
-
-        for (let i = 0; i < 500; ++i) {
+        for (let i = 0; i < 200; ++i) {
 
             points[i] = [
                 (Math.random() - 0.5) * 2.0,
@@ -35,10 +27,10 @@ import {quickHull} from "../../build/tympanum.module.js";
         }
 
         let time = performance.now();
-        hull = quickHull(points);
+        triangulation = delaunay(points);
 
         time = performance.now() - time;
-        console.log("Time to generate hull: " + time.toFixed(2) + "ms");
+        console.log("Time to generate triangulation: " + time.toFixed(2) + "ms");
 
         draw();
     }
@@ -46,8 +38,7 @@ import {quickHull} from "../../build/tympanum.module.js";
     function draw()
     {
         drawing.clear();
-        drawing.drawFacets(hull, points);
-        drawing.drawFacetNormals(hull, points);
+        drawing.drawFacets(triangulation, points);
         drawing.drawPoints(points);
     }
 })();

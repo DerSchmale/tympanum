@@ -20,23 +20,20 @@ import { hyperplaneFromPoints, negate, signedDistToPlane } from "../math/VecMath
 export function findNeighbor(facet: Facet, ridge: Ridge, facets: Facet[]): void
 {
     const src = ridge.verts;
-    const len = src.length;
+    const numVerts = src.length;
 
     for (let f of facets) {
         for (let r of f.ridges) {
             // do not bother if we already found them
             if (r.neighbor) continue;
 
-            let index = r.verts.indexOf(src[0]);
-            let found = index >= 0;
-            let i = 1;
+            let found = true;
 
-            while (found && i < len) {
-                index = (index + 1) % len;
-                found = (r.verts[index]) == src[i];
-                ++i;
+            for (let i = 0; i < numVerts; ++i) {
+                found = found && r.verts.indexOf(src[i]) >= 0;
             }
 
+            // all vertices are shared
             if (found) {
                 ridge.neighbor = r;
                 r.neighbor = ridge;
@@ -55,14 +52,14 @@ export function findNeighbor(facet: Facet, ridge: Ridge, facets: Facet[]): void
  *
  * @ignore
  */
-export function generateFacetPlane(facet: Facet, points: Vector[], centroid?: Vector): void
+export function generateFacetPlane(facet: Facet, points: Vector[], dim: number, centroid?: Vector): void
 {
     const verts = facet.ridges.map(r => points[r.verts[0]]);
 
     let plane = facet.plane = hyperplaneFromPoints(verts);
 
 
-    if (centroid && signedDistToPlane(centroid, plane) > 0.0) {
+    if (centroid && signedDistToPlane(centroid, plane, dim) > 0.0) {
         negate(plane);
 
         // flip ridges for consistency

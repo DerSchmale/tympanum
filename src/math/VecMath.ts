@@ -20,9 +20,11 @@ export function dim(v: Vector): number
  *
  * @ignore
  */
-export function dot(v1: Vector, v2: Vector): number
+export function dot(v1: Vector, v2: Vector, dim: number = -1): number
 {
-    const dim = v1.length;
+    if (dim === -1)
+        dim = v1.length;
+
     let d = v1[0] * v2[0];
 
     for (let i = 1; i < dim; ++i)
@@ -80,17 +82,19 @@ export function normalizePlane(v: Vector): Vector
  *
  * @ignore
  */
-function cofactor(mat: Vector[], tgt: Vector[], p: number, q: number, dim: number)
+function cofactor(mat: Vector[], tgt: Vector[], row: number, col: number, dim: number)
 {
     let i = 0, j = 0;
 
-    for (let row = 0; row < dim; row++) {
-        if (row === p) continue;
+    for (let r = 0; r < dim; ++r) {
+        if (r === row) continue;
 
-        for (let col = 0; col < dim; col++) {
-            if (col === q) continue;
+        j = 0;
 
-            tgt[i][j] = mat[row][col];
+        for (let c = 0; c < dim; ++c) {
+            if (c === col) continue;
+
+            tgt[i][j] = mat[r][c];
             ++j;
         }
 
@@ -100,6 +104,7 @@ function cofactor(mat: Vector[], tgt: Vector[], p: number, q: number, dim: numbe
 
 /**
  * Creates a new N-dimensional matrix.
+ * Indexing is [row][col].
  *
  * @ignore
  */
@@ -134,7 +139,7 @@ function det(v: Vector[], dim: number): number
     else {
         let s = 1;
         let d = 0;
-        let sub = getSquareMatrix(dim);
+        let sub = getSquareMatrix(dim - 1);
 
         for (let i = 0; i < dim; ++i) {
             cofactor(v, sub, 0, i, dim);
@@ -176,9 +181,11 @@ function generalizedCross(v: Vector[], tgt?: Vector): Vector
         // IE: the eN elements are basically "selectors" for each target vector's element
 
         let sign = dim % 2? -1 : 1;
-        let sub = getSquareMatrix(dim);
+        let sub = getSquareMatrix(dim - 1);
 
         for (let i = 0; i < dim; ++i) {
+            // use the last row because those would contain the basis vectors
+            // pass in v as a matrix, which will look like the actual matrix
             cofactor(v, sub, dim - 1, i, dim);
             tgt[i] = sign * det(sub, dim - 1);
             sign = -sign;
@@ -191,6 +198,9 @@ function generalizedCross(v: Vector[], tgt?: Vector): Vector
 /**
  * Calculates the hyperplane that contains the given points. The amount of points defines the dimension of the
  * hyperplane.
+ *
+ * 🎵🎶🎵  Hypah Hypah!  🎶🎵🎶
+ * 🎵🎶🎵  Hypah Hypah!  🎶🎵🎶
  *
  * @ignore
  */
@@ -214,8 +224,9 @@ export function hyperplaneFromPoints(p: Vector[], tgt?: Vector) {
 
     // calculate normal for hyperplane
     generalizedCross(vecs, tgt);
+
     // calculate offset
-    tgt[dim] = -dot(v0, tgt);
+    tgt[dim] = -dot(v0, tgt, dim);
     // not sure if this is necessary
     normalizePlane(tgt);
     return tgt;
@@ -239,9 +250,8 @@ export function negate(v: Vector): Vector
  *
  * @ignore
  */
-export function signedDistToPlane(point: Vector, plane: Vector)
+export function signedDistToPlane(point: Vector, plane: Vector, dim: number)
 {
-    const dim = point.length;
     let d = plane[dim];
 
     for (let i = 0; i < dim; ++i)

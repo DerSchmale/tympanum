@@ -1,11 +1,11 @@
-import {quickHull} from "../../build/tympanum.module.js";
+import {delaunay} from "../../build/tympanum.module.js";
 
 (() => {
     window.onresize = draw;
     window.onload = init;
 
 
-    let hull;
+    let triangulation;
     let drawing;
     let points;
     let moved = false;
@@ -29,7 +29,7 @@ import {quickHull} from "../../build/tympanum.module.js";
     function init()
     {
         drawing = initCanvas(document.getElementById("canvas2D"), draw);
-        drawing.zOffset = 1.4;
+        drawing.zOffset = 2.0;
         generate();
     }
 
@@ -37,15 +37,17 @@ import {quickHull} from "../../build/tympanum.module.js";
     {
         points = [];
 
-        for (let i = 0; i < 5000; ++i) {
-            let azim = Math.random() * Math.PI * 2.0;
-            let pol = (Math.random() - .5) * Math.PI * 2.0;
-            let rad = Math.random();
-            points[i] = [Math.sin(pol) * Math.cos(azim) * rad, Math.sin(pol) * Math.sin(azim) * rad, Math.cos(pol) * rad];
+        for (let i = 0; i < 100; ++i) {
+
+            points[i] = [
+                (Math.random() - .5) * 2.0,
+                (Math.random() - .5) * 2.0,
+                (Math.random() - .5) * 2.0
+            ];
         }
 
         let time = performance.now();
-        hull = quickHull(points);
+        triangulation = delaunay(points);
 
         time = performance.now() - time;
         console.log("Time to generate hull: " + time.toFixed(2) + "ms");
@@ -56,9 +58,7 @@ import {quickHull} from "../../build/tympanum.module.js";
     function draw()
     {
         drawing.clear();
-        drawing.drawFacets(hull, points);
-        drawing.drawFacetNormals(hull, points);
+        drawing.drawFacets(triangulation, points);
         drawing.drawPoints(points);
     }
-
 })();

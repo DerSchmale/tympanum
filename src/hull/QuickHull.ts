@@ -1,9 +1,11 @@
 import { Vector } from "../types";
-import { dim, signedDistToPlane } from "../math/VecMath";
+import { dim, hyperplaneFromPoints, signedDistToPlane } from "../math/VecMath";
 import { Facet, Ridge } from "../geom/Geometry";
 import { createSimplex } from "../geom/Simplex";
 import { findNeighbor, generateFacetPlane } from "../geom/utils";
-import { removeElementOutOfOrder } from "@derschmale/array-utils";
+import { removeElementOutOfOrder, removeIndexOutOfOrder, shuffle } from "@derschmale/array-utils";
+
+const eps = 0.0001;
 
 /**
  * Some meta-data while constructing the facets
@@ -45,7 +47,7 @@ function getFurthestPoint(facet: Facet): number
  *
  * @ignore
  */
-function generateOutsideSets(indices: number[], points: Vector[], facets: Facet[])
+function generateOutsideSets(indices: number[], points: Vector[], facets: Facet[], dim: number)
 {
     let outsideSets = facets.map(_ => []);
 
@@ -55,9 +57,9 @@ function generateOutsideSets(indices: number[], points: Vector[], facets: Facet[
         const p = points[index];
 
         for (let f of facets) {
-            let dist = signedDistToPlane(p, f.plane);
+            let dist = signedDistToPlane(p, f.plane, dim);
 
-            if (dist > 0) {
+            if (dist > eps) {
                 const meta = f.meta;
                 meta.outsideSet.push(index);
                 meta.outsideDist.push(dist);
@@ -75,7 +77,7 @@ function generateOutsideSets(indices: number[], points: Vector[], facets: Facet[
  *
  * @ignore
  */
-function getVisibleSet(p: Vector, facet: Facet, visible: Facet[], horizon: Ridge[])
+function getVisibleSet(p: Vector, facet: Facet, visible: Facet[], horizon: Ridge[], dim: number)
 {
     visible.push(facet);
     facet.meta.currentPoint = p;
@@ -86,8 +88,8 @@ function getVisibleSet(p: Vector, facet: Facet, visible: Facet[], horizon: Ridge
         // already checked
         if (neighbor.meta.currentPoint === p) continue;
 
-        if (signedDistToPlane(p, neighbor.plane) > 0.0)
-            getVisibleSet(p, neighbor, visible, horizon);
+        if (signedDistToPlane(p, neighbor.plane, dim) > eps)
+            getVisibleSet(p, neighbor, visible, horizon, dim);
         else
             horizon.push(r);
     }
@@ -127,7 +129,7 @@ function attachNewFacet(ridge: Ridge, p: number, points: Vector[], facets: Facet
         newFacet.ridges.push(ridge);
     }
 
-    generateFacetPlane(newFacet, points, centroid);
+    generateFacetPlane(newFacet, points, dim, centroid);
 
     return newFacet;
 }
@@ -155,19 +157,98 @@ function connectHorizonRidges(points: Vector[], index: number, H: Ridge[], centr
  *
  * @ignore
  */
-function createCentroid(points: Vector[], d: number): Vector
+function createCentroid(points: Vector[], d: number, indices: number[]): Vector
 {
     // a point that will be internal from the very first simplex. Used to correctly orient new planes
     const centroid = points[0].slice();
 
     for (let j = 0; j < d; ++j) {
         for (let i = 1; i <= d; ++i) {
-            centroid[j] += points[i][j];
+            let index = indices[i];
+            centroid[j] += points[index][j];
         }
         centroid[j] /= d + 1;
     }
 
     return centroid;
+}
+
+/**
+ * Returns the index with the "largest" point. The largest point is the one with the highest x coefficient, or y, z,
+ * etc. if equal
+ *
+ * @ignore
+ */
+function maximize(i: number, maxIndex: number, points: Vector[], d: number): number
+{
+    const p = points[i];
+    const max = points[maxIndex];
+
+    for (let j = 0; j < d; ++j) {
+        if (p[j] < max[j]) return maxIndex;
+        if (p[j] > max[j]) return i;
+    }
+
+    // all the same: this only happens with duplicates, which shouldn't be in the set
+    return maxIndex;
+}
+
+/**
+ * @ignore
+ */
+function minimize(i: number, minIndex: number, points: Vector[], d: number): number
+{
+    const p = points[i];
+    const min = points[minIndex];
+
+    for (let j = 0; j < d; ++j) {
+        if (p[j] > min[j]) return minIndex;
+        if (p[j] < min[j]) return i;
+    }
+
+    // all the same: this only happens with duplicates, which shouldn't be in the set
+    return minIndex;
+}
+
+/**
+ * Tries to find the biggest shape to start with
+ * @ignore
+ */
+function getOptimalStart(points: Vector[], d: number): number[]
+{
+    const numPoints = points.length;
+    let minIndex = 0;
+    let maxIndex = 0;
+
+    // the initial axis
+    for (let i = 1; i < numPoints; ++i) {
+        maxIndex = maximize(i, maxIndex, points, d);
+        minIndex = minimize(i, minIndex, points, d);
+    }
+
+    const indices = [ minIndex, maxIndex ];
+    const planePts = [ points[minIndex], points[maxIndex] ];
+
+    // already have 2 points, need d + 1 in total
+    // in increasing dimensions, find the furthest from the current hyperplane
+    for (let i = 2; i < d + 1; ++i) {
+        const plane = hyperplaneFromPoints(planePts);
+        let maxDist = -Infinity;
+        let p = -1;
+
+        for (let j = 0; j < numPoints; ++j) {
+            const dist = Math.abs(signedDistToPlane(points[j], plane, i));
+            if (dist > maxDist) {
+                maxDist = dist;
+                p = j;
+            }
+        }
+
+        indices.push(p);
+        planePts.push(points[p]);
+    }
+
+    return indices;
 }
 
 /**
@@ -180,30 +261,41 @@ function createCentroid(points: Vector[], d: number): Vector
  */
 export function quickHull(points: Vector[]): Facet[]
 {
-    if (points.length === 0) return;
+    const numPoints = points.length;
+    if (numPoints === 0) return;
     const d = dim(points[0]);
 
-    if (points.length <= d) {
+    if (numPoints <= d) {
         console.log(`A convex hull in ${d} dimensions requires at least ${d + 1} points.`);
     }
 
-    const facets = createSimplex(points, d);
+    // initial unprocessed point indices:
+    let indices = [];
+    for (let i = 0; i < numPoints; ++i)
+        indices.push(i);
+
+    const simplexIndices = getOptimalStart(points, d);
+
+    const centroid = createCentroid(points, d, simplexIndices);
+    const facets = createSimplex(points, d, simplexIndices);
+
     for (let f of facets)
         f.meta = new FacetInfo();
 
-    const centroid = createCentroid(points, d);
+    // sorting them in descending order makes them easy to delete optimally
+    simplexIndices.sort((a, b) => b - a);
+    for (let i = 0; i < d + 1; ++i) {
+        removeIndexOutOfOrder(indices, simplexIndices[i]);
+    }
 
-    // initial unprocessed point indices:
-    const indices = [];
-    for (let i = d + 1; i < points.length; ++i)
-        indices.push(i);
+    shuffle(indices);
 
-    generateOutsideSets(indices, points, facets);
+    generateOutsideSets(indices, points, facets, d);
 
     // do not cache facets.length, as it will keep changing
     let done = false;
 
-    // this extra loop should not be required
+    // TODO: this extra loop should not be required
     while (!done) {
         done = true;
         for (let i = 0; i < facets.length; ++i) {
@@ -216,13 +308,13 @@ export function quickHull(points: Vector[]): Facet[]
                 const V = [];
                 const H = [];
 
-                getVisibleSet(points[p], facet, V, H);
+                getVisibleSet(points[p], facet, V, H, d);
 
                 const newFacets = connectHorizonRidges(points, p, H, centroid, d);
 
                 for (let v of V) {
                     if (removeElementOutOfOrder(facets, v) <= i) --i;
-                    generateOutsideSets(v.meta.outsideSet, points, newFacets);
+                    generateOutsideSets(v.meta.outsideSet, points, newFacets, d);
                     if (v.meta.outsideSet.length > 0)
                         done = false;
                 }
@@ -231,6 +323,7 @@ export function quickHull(points: Vector[]): Facet[]
             }
         }
     }
+
 
     for (let f of facets)
         f.meta = null;

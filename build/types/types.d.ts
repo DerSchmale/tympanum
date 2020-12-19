@@ -1,1 +1,4 @@
-export declare type Vector = Array<number> | Float32Array;
+/**
+ * Vector is the representation for any N-dimensional vector. This can be either an array of numbers, or a Float32Array.
+ */
+export declare type Vector = number[] | Float32Array;

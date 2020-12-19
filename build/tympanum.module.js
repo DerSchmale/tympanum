@@ -1,1 +1,707 @@
-function r(r,t,e,n,o){for(var i=0,a=0,f=0;f<o;f++)if(f!==e){for(var u=0;u<o;u++)u!==n&&(t[i][a]=r[f][u],++a);++i}}function t(r){for(var t=[],e=0;e<r;++e)t[e]=new Float32Array(r);return t}function e(n,o){if(1===o)return n[0][0];if(2===o)return n[0][0]*n[1][1]-n[0][1]*n[1][0];if(3===o)return n[0][0]*n[1][1]*n[2][2]+n[0][1]*n[1][2]*n[2][0]+n[0][2]*n[1][0]*n[2][1]-n[0][2]*n[1][1]*n[2][0]-n[0][1]*n[1][0]*n[2][2]-n[0][0]*n[1][2]*n[2][1];for(var i=1,a=0,f=t(o),u=0;u<o;++u)r(n,f,0,u,o),a+=i*n[0][u]*e(f,o-1),i=-i;return a}function n(n,o){var i=n.length,a=n[0],f=[];o=o||new Float32Array(i+1);for(var u=1;u<i;++u){for(var v=n[u],s=[],h=0;h<i;++h)s[h]=v[h]-a[h];f.push(s)}return function(n,o){var i=n[0].length;if(o=o||new Float32Array(i),3===i){var a=n[0],f=n[1],u=a[0],v=a[1],s=a[2],h=f[0],l=f[1],g=f[2];o[0]=v*g-s*l,o[1]=s*h-u*g,o[2]=u*l-v*h}else for(var c=i%2?-1:1,p=t(i),d=0;d<i;++d)r(n,p,i-1,d,i),o[d]=c*e(p,i-1),c=-c}(f,o),o[i]=-function(r,t){for(var e=r.length,n=r[0]*t[0],o=1;o<e;++o)n+=r[o]*t[o];return n}(a,o),function(r){for(var t=r.length,e=r[0]*r[0],n=1;n<t-1;++n)e+=r[n]*r[n];if(0===e)return r;for(e=1/Math.sqrt(e),n=0;n<t;++n)r[n]*=e}(o),o}function o(r,t){for(var e=r.length,n=t[e],o=0;o<e;++o)n+=r[o]*t[o];return n}var i=function(r){this.verts=[],this.facet=r},a=function(){this.ridges=[]};function f(r,t,e){for(var n=t.verts,o=n.length,i=0,a=e;i<a.length;i++)for(var f=0,u=a[i].ridges;f<u.length;f++){var v=u[f];if(!v.neighbor){for(var s=v.verts.indexOf(n[0]),h=s>=0,l=1;h&&l<o;)s=(s+1)%o,h=v.verts[s]==n[l],++l;if(h)return t.neighbor=v,void(v.neighbor=t)}}}function u(r,t,e){var i=r.ridges.map((function(r){return t[r.verts[0]]})),a=r.plane=n(i);if(e&&o(e,a)>0){!function(r){for(var t=r.length,e=0;e<t;++e)r[e]=-r[e]}(a),r.ridges.reverse();for(var f=0,u=r.ridges;f<u.length;f++){u[f].verts.reverse()}}}function v(r,t){for(var e=[],n=t+1,o=[],v=0;v<=t;++v){for(var s=new a,h=0;h<t;++h)o[h]=(v+h)%n;for(var l=0;l<t;++l){var g=s.ridges[l]=new i(s);for(h=0;h<t-1;++h)g.verts[h]=o[(l+h)%t];f(0,g,e)}u(s,r,r[(v+t)%(t+1)]),e.push(s)}return e}function s(r,t){var e=r.pop();if(e===t)return r.length;var n=r.indexOf(t);if(-1===n)throw r.push(e),new Error("Removing component that's not present");return r[n]=e,n}var h=function(){this.outsideSet=[],this.outsideDist=[]};function l(r){var t=r.meta,e=t.outsideSet,n=t.outsideDist,o=e.length;if(0===o)return-1;for(var i=e[0],a=n[0],f=1;f<o;++f)n[f]>a&&(a=n[f],i=e[f]);return i}function g(r,t,e){for(var n=e.map((function(r){return[]})),i=r.length,a=0;a<i;++a)for(var f=r[a],u=t[f],v=0,s=e;v<s.length;v++){var h=s[v],l=o(u,h.plane);if(l>0){var g=h.meta;g.outsideSet.push(f),g.outsideDist.push(l);break}}return n}function c(r,t,e,n){e.push(t),t.meta.currentPoint=r;for(var i=0,a=t.ridges;i<a.length;i++){var f=a[i],u=f.neighbor.facet;u.meta.currentPoint!==r&&(o(r,u.plane)>0?c(r,u,e,n):n.push(f))}}function p(r,t,e,n,o,v){var s=new a;s.meta=new h;var l=r.verts.slice();l.push(t),s.ridges.push(r),r.facet=s;for(var g=1;g<v;++g){for(var c=new i(s),p=0;p<v-1;++p)c.verts[p]=l[(g+p)%v];f(0,c,n),s.ridges.push(c)}return u(s,e,o),s}function d(r,t,e,n,o){for(var i=[],a=0,f=e;a<f.length;a++){var u=p(f[a],t,r,i,n,o);i.push(u)}return i}function m(r){if(0!==r.length){var t=function(r){return r.length}(r[0]);r.length<=t&&console.log("A convex hull in "+t+" dimensions requires at least "+(t+1)+" points.");for(var e=v(r,t),n=0,o=e;n<o.length;n++){o[n].meta=new h}for(var i=function(r,t){for(var e=r[0].slice(),n=0;n<t;++n){for(var o=1;o<=t;++o)e[n]+=r[o][n];e[n]/=t+1}return e}(r,t),a=[],f=t+1;f<r.length;++f)a.push(f);g(a,r,e);for(var u=!1;!u;){u=!0;for(f=0;f<e.length;++f){var p=e[f],m=l(p);if(-1!==m){s(p.meta.outsideSet,m);var w=[],S=[];c(r[m],p,w,S);for(var b=d(r,m,S,i,t),x=0,y=w;x<y.length;x++){var A=y[x];s(e,A)<=f&&--f,g(A.meta.outsideSet,r,b),A.meta.outsideSet.length>0&&(u=!1)}e.push.apply(e,b)}}}for(var D=0,F=e;D<F.length;D++){F[D].meta=null}return e}}export{a as Facet,i as Ridge,v as createSimplex,m as quickHull};
+/**
+ * Base geometry elements.
+ *
+ * @author derschmale <http://www.derschmale.com>
+ */
+/**
+ * Ridge is a face of a facet, represented as the set of vertices forming the ridge. A line facet contains 2 ridges
+ * each containing a single point. A triangle facet contains 3 ridges containing 2 vertices (segment end points), a
+ * tetrahedral facet contains 4 face ridges (each containing the three triangle vertices).
+ */
+var Ridge = /** @class */ (function () {
+    /**
+     * Creates a new ridge belonging to a facet     */
+    function Ridge(facet) {
+        /**
+         * The vertices of the ridge. These are always the points forming the ridge.
+         */
+        this.verts = [];
+        this.facet = facet;
+    }
+    return Ridge;
+}());
+/**
+ * In N dimensions, a facet forms an N-1 "polygon" which can be combined into an N-dimensional shape such as a
+ * simplex, a convex hull, a triangulation, ...
+ */
+var Facet = /** @class */ (function () {
+    function Facet() {
+        /**
+         * The set of ridges for the facet. Ridges are a dimension lower than the facet (ie: points for lines, edges for
+         * triangles, faces for tetrahedrons).
+         */
+        this.ridges = [];
+    }
+    return Facet;
+}());
+
+/**
+ * Some basic N-dimensional vector math.
+ * @author derschmale <http://www.derschmale.com>
+ */
+/**
+ * Returns the dimension of a Vector.
+ *
+ * @ignore
+ */
+function dim(v) {
+    return v.length;
+}
+/**
+ * The dot (inner) product of two vectors.
+ *
+ * @ignore
+ */
+function dot(v1, v2, dim) {
+    if (dim === void 0) { dim = -1; }
+    if (dim === -1)
+        dim = v1.length;
+    var d = v1[0] * v2[0];
+    for (var i = 1; i < dim; ++i)
+        d += v1[i] * v2[i];
+    return d;
+}
+/**
+ * Normalizes a plane encoded as a vector as (normal, offset).
+ *
+ * @ignore
+ */
+function normalizePlane(v) {
+    var len = v.length;
+    var d = v[0] * v[0];
+    for (var i = 1; i < len - 1; ++i)
+        d += v[i] * v[i];
+    if (d === 0.0)
+        return v;
+    d = 1.0 / Math.sqrt(d);
+    for (var i = 0; i < len; ++i)
+        v[i] *= d;
+    return v;
+}
+/**
+ * Generates the cofactor matrix.
+ *
+ * @ignore
+ */
+function cofactor(mat, tgt, row, col, dim) {
+    var i = 0, j = 0;
+    for (var r = 0; r < dim; ++r) {
+        if (r === row)
+            continue;
+        j = 0;
+        for (var c = 0; c < dim; ++c) {
+            if (c === col)
+                continue;
+            tgt[i][j] = mat[r][c];
+            ++j;
+        }
+        ++i;
+    }
+}
+/**
+ * Creates a new N-dimensional matrix.
+ * Indexing is [row][col].
+ *
+ * @ignore
+ */
+function getSquareMatrix(dim) {
+    var sub = [];
+    for (var i = 0; i < dim; ++i)
+        sub[i] = new Float32Array(dim);
+    return sub;
+}
+/**
+ * Calculates the determinant for a matrix.
+ *
+ * @ignore
+ */
+function det(v, dim) {
+    if (dim === 1) {
+        return v[0][0];
+    }
+    // just early base cases for efficiency, these wouldn't really be necessary
+    else if (dim === 2) {
+        return v[0][0] * v[1][1] - v[0][1] * v[1][0];
+    }
+    else if (dim === 3) {
+        return v[0][0] * v[1][1] * v[2][2] + v[0][1] * v[1][2] * v[2][0] + v[0][2] * v[1][0] * v[2][1]
+            - v[0][2] * v[1][1] * v[2][0] - v[0][1] * v[1][0] * v[2][2] - v[0][0] * v[1][2] * v[2][1];
+    }
+    else {
+        var s = 1;
+        var d = 0;
+        var sub = getSquareMatrix(dim - 1);
+        for (var i = 0; i < dim; ++i) {
+            cofactor(v, sub, 0, i, dim);
+            d += s * v[0][i] * det(sub, dim - 1);
+            s = -s;
+        }
+        return d;
+    }
+}
+/**
+ * Calculates the generalized cross product.
+ *
+ * @ignore
+ */
+function generalizedCross(v, tgt) {
+    var dim = v[0].length;
+    tgt = tgt || new Float32Array(dim);
+    if (dim === 3) {
+        var ar = v[0], br = v[1];
+        var ax = ar[0], ay = ar[1], az = ar[2];
+        var bx = br[0], by = br[1], bz = br[2];
+        tgt[0] = ay * bz - az * by;
+        tgt[1] = az * bx - ax * bz;
+        tgt[2] = ax * by - ay * bx;
+    }
+    else {
+        // so the generalized cross product is the determinant of:
+        // | v00 v01 v02 ... |
+        // | v10 v11 v12 ... |
+        // | v20 v21 v22 ... |
+        // | ... ... ... ... |
+        // | e0  e1  e2  ... |
+        // with eN being the n-th standard basis vector (1, 0, 0), (0, 1, 0)
+        // IE: the eN elements are basically "selectors" for each target vector's element
+        var sign = dim % 2 ? -1 : 1;
+        var sub = getSquareMatrix(dim - 1);
+        for (var i = 0; i < dim; ++i) {
+            // use the last row because those would contain the basis vectors
+            // pass in v as a matrix, which will look like the actual matrix
+            cofactor(v, sub, dim - 1, i, dim);
+            tgt[i] = sign * det(sub, dim - 1);
+            sign = -sign;
+        }
+    }
+    return tgt;
+}
+/**
+ * Calculates the hyperplane that contains the given points. The amount of points defines the dimension of the
+ * hyperplane.
+ *
+ * 🎵🎶🎵  Hypah Hypah!  🎶🎵🎶
+ * 🎵🎶🎵  Hypah Hypah!  🎶🎵🎶
+ *
+ * @ignore
+ */
+function hyperplaneFromPoints(p, tgt) {
+    var dim = p.length;
+    var v0 = p[0];
+    var vecs = [];
+    tgt = tgt || new Float32Array(dim + 1);
+    for (var i = 1; i < dim; ++i) {
+        var pt = p[i];
+        var v = [];
+        for (var j = 0; j < dim; ++j) {
+            v[j] = pt[j] - v0[j];
+        }
+        vecs.push(v);
+    }
+    // calculate normal for hyperplane
+    generalizedCross(vecs, tgt);
+    // calculate offset
+    tgt[dim] = -dot(v0, tgt, dim);
+    // not sure if this is necessary
+    normalizePlane(tgt);
+    return tgt;
+}
+/**
+ * Flips a vector.
+ *
+ * @ignore
+ */
+function negate(v) {
+    var dim = v.length;
+    for (var i = 0; i < dim; ++i)
+        v[i] = -v[i];
+    return v;
+}
+/**
+ * Calculates the signed distance of a point to a plane.
+ *
+ * @ignore
+ */
+function signedDistToPlane(point, plane, dim) {
+    var d = plane[dim];
+    for (var i = 0; i < dim; ++i)
+        d += point[i] * plane[i];
+    return d;
+}
+
+/**
+ * Some shape construction code used internally.
+ *
+ * @author derschmale <http://www.derschmale.com>
+ */
+/**
+ * Assign the neighbor from a set. Generally only used while constructing a new facet.
+ *
+ * @param facet The facet owning the ridge.
+ * @param ridge The ridge for which to find the neighbor.
+ * @param facets The set of facets to search.
+ *
+ * @ignore
+ */
+function findNeighbor(facet, ridge, facets) {
+    var src = ridge.verts;
+    var numVerts = src.length;
+    for (var _i = 0, facets_1 = facets; _i < facets_1.length; _i++) {
+        var f = facets_1[_i];
+        for (var _a = 0, _b = f.ridges; _a < _b.length; _a++) {
+            var r = _b[_a];
+            // do not bother if we already found them
+            if (r.neighbor)
+                continue;
+            var found = true;
+            for (var i = 0; i < numVerts; ++i) {
+                found = found && r.verts.indexOf(src[i]) >= 0;
+            }
+            // all vertices are shared
+            if (found) {
+                ridge.neighbor = r;
+                r.neighbor = ridge;
+                return;
+            }
+        }
+    }
+}
+/**
+ * Generates a plane for a facet. Used when constructing new facets.
+ * @param facet The facet to construct a new plane for.
+ * @param points The general set of points the indices refer to.
+ * @param centroid An optional point that's guaranteed to be behind the plane. This can be used to orient the face
+ * if the vertex order is inconsistent.
+ *
+ * @ignore
+ */
+function generateFacetPlane(facet, points, dim, centroid) {
+    var verts = facet.ridges.map(function (r) { return points[r.verts[0]]; });
+    var plane = facet.plane = hyperplaneFromPoints(verts);
+    if (centroid && signedDistToPlane(centroid, plane, dim) > 0.0) {
+        negate(plane);
+        // flip ridges for consistency
+        facet.ridges.reverse();
+        for (var _i = 0, _a = facet.ridges; _i < _a.length; _i++) {
+            var r = _a[_i];
+            r.verts.reverse();
+        }
+    }
+}
+
+/**
+ * Creates an N-simplex from N+1 points.
+ *
+ * @param points An array of points. Only the first N+1 points are used.
+ * @param dim The dimension of the simplex.
+ * @param indices An optional array of indices into points to remap which points are used
+ *
+ * @author derschmale <http://www.derschmale.com>
+ */
+function createSimplex(points, dim, indices) {
+    // TODO: We can find a better initial data set, similar to QHull:
+    //  find the minX, maxX points, and iteratively extend with furthest point
+    //  (starts with signed dist to line, then to plane in 3D, then to hyperplane in 4D)
+    //  This is the same sort of logic of the base Quickhull algorithm, so maybe it's not that much of an
+    //  improvement to do it in the first step?
+    var facets = [];
+    var numVerts = dim + 1;
+    var verts = [];
+    for (var i = 0; i <= dim; ++i) {
+        var f = new Facet();
+        // collect all verts for this facet
+        // the facet is made up of dim + 1 points, so cycle through these
+        for (var v = 0; v < dim; ++v) {
+            var index_1 = (i + v) % numVerts;
+            verts[v] = indices ? indices[index_1] : index_1;
+        }
+        for (var r = 0; r < dim; ++r) {
+            var ridge = f.ridges[r] = new Ridge(f);
+            for (var v = 0; v < dim - 1; ++v) {
+                ridge.verts[v] = verts[(r + v) % dim];
+            }
+            // find neighbours from already generated sets
+            // there's probably an analytical way to do this
+            findNeighbor(f, ridge, facets);
+        }
+        // an opposing face to ensure correct direction
+        var index = (i + dim) % (dim + 1);
+        var opposing = points[indices ? indices[index] : index];
+        generateFacetPlane(f, points, dim, opposing);
+        facets.push(f);
+    }
+    return facets;
+}
+
+/**
+ * Randomizes the order of the elements in the array.
+ */
+function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+    return array;
+}
+
+/**
+ * Removes an item by removing the last item and inserting it in its place. Should only be used when the order of
+ * elements is not important.
+ */
+function removeIndexOutOfOrder(target, index) {
+    console.assert(index < target.length, "Index out of bounds!");
+    var last = target.pop();
+    if (target.length > 0 && last !== target[index])
+        target[index] = last;
+    return index;
+}
+function removeElementOutOfOrder(target, elm) {
+    var last = target.pop();
+    if (last === elm) {
+        return target.length;
+    }
+    else {
+        var index = target.indexOf(elm);
+        if (index === -1) {
+            target.push(last);
+            throw new Error("Removing component that's not present");
+        }
+        target[index] = last;
+        return index;
+    }
+}
+
+var eps = 0.0001;
+/**
+ * Some meta-data while constructing the facets
+ */
+var FacetInfo = /** @class */ (function () {
+    function FacetInfo() {
+        this.outsideSet = [];
+        this.outsideDist = [];
+    }
+    return FacetInfo;
+}());
+/**
+ * Gets the point in an outside set that's the furthest from the facet plane.
+ *
+ * @ignore
+ */
+function getFurthestPoint(facet) {
+    var _a = facet.meta, outsideSet = _a.outsideSet, outsideDist = _a.outsideDist;
+    var len = outsideSet.length;
+    if (len === 0)
+        return -1;
+    var p = outsideSet[0];
+    var dist = outsideDist[0];
+    for (var i = 1; i < len; ++i) {
+        if (outsideDist[i] > dist) {
+            dist = outsideDist[i];
+            p = outsideSet[i];
+        }
+    }
+    return p;
+}
+/**
+ * Assigns all points to the outside sets of a face.
+ *
+ * @ignore
+ */
+function generateOutsideSets(indices, points, facets, dim) {
+    var outsideSets = facets.map(function (_) { return []; });
+    var len = indices.length;
+    for (var i = 0; i < len; ++i) {
+        var index = indices[i];
+        var p = points[index];
+        for (var _i = 0, facets_1 = facets; _i < facets_1.length; _i++) {
+            var f = facets_1[_i];
+            var dist = signedDistToPlane(p, f.plane, dim);
+            if (dist > eps) {
+                var meta = f.meta;
+                meta.outsideSet.push(index);
+                meta.outsideDist.push(dist);
+                break;
+            }
+        }
+    }
+    // any point now not in an outside set is inside the hull
+    return outsideSets;
+}
+/**
+ * Finds all faces visible to a point and their boundary ridges.
+ *
+ * @ignore
+ */
+function getVisibleSet(p, facet, visible, horizon, dim) {
+    visible.push(facet);
+    facet.meta.currentPoint = p;
+    for (var _i = 0, _a = facet.ridges; _i < _a.length; _i++) {
+        var r = _a[_i];
+        var neighbor = r.neighbor.facet;
+        // already checked
+        if (neighbor.meta.currentPoint === p)
+            continue;
+        if (signedDistToPlane(p, neighbor.plane, dim) > eps)
+            getVisibleSet(p, neighbor, visible, horizon, dim);
+        else
+            horizon.push(r);
+    }
+}
+/**
+ * Builds a new face from a ridge and a point.
+ *
+ * @ignore
+ */
+function attachNewFacet(ridge, p, points, facets, centroid, dim) {
+    // in 2D, we simply need to create 1 new facet (line) from old ridge to p
+    var newFacet = new Facet();
+    newFacet.meta = new FacetInfo();
+    // collect all verts for this facet, which is the horizon ridge + this point
+    var verts = ridge.verts.slice();
+    verts.push(p);
+    // the horizon ridge is part of the new facet, and gets to keep its neighbor
+    newFacet.ridges.push(ridge);
+    ridge.facet = newFacet;
+    // dim + 1 ridges (3 edges to a triangle in 2D, 4 faces to a tetrahedron in 3D)
+    // start with 1, since 0 would be the same as the already existing ridge above
+    for (var r = 1; r < dim; ++r) {
+        var ridge_1 = new Ridge(newFacet);
+        for (var v = 0; v < dim - 1; ++v)
+            ridge_1.verts[v] = verts[(r + v) % dim];
+        // so we only need to search for neighbours in the newly generated facets, only the horizons are attached to
+        // the old ones
+        findNeighbor(newFacet, ridge_1, facets);
+        newFacet.ridges.push(ridge_1);
+    }
+    generateFacetPlane(newFacet, points, dim, centroid);
+    return newFacet;
+}
+/**
+ * Builds a set of new facets for a point and its horizon ridges.
+ *
+ * @ignore
+ */
+function connectHorizonRidges(points, index, H, centroid, dim) {
+    var newFacets = [];
+    // link horizon ridges with new point
+    for (var _i = 0, H_1 = H; _i < H_1.length; _i++) {
+        var ridge = H_1[_i];
+        var newFacet = attachNewFacet(ridge, index, points, newFacets, centroid, dim);
+        newFacets.push(newFacet);
+    }
+    return newFacets;
+}
+/**
+ * Creates the centroid for a collection of d points.
+ *
+ * @ignore
+ */
+function createCentroid(points, d, indices) {
+    // a point that will be internal from the very first simplex. Used to correctly orient new planes
+    var centroid = points[0].slice();
+    for (var j = 0; j < d; ++j) {
+        for (var i = 1; i <= d; ++i) {
+            var index = indices[i];
+            centroid[j] += points[index][j];
+        }
+        centroid[j] /= d + 1;
+    }
+    return centroid;
+}
+/**
+ * Returns the index with the "largest" point. The largest point is the one with the highest x coefficient, or y, z,
+ * etc. if equal
+ *
+ * @ignore
+ */
+function maximize(i, maxIndex, points, d) {
+    var p = points[i];
+    var max = points[maxIndex];
+    for (var j = 0; j < d; ++j) {
+        if (p[j] < max[j])
+            return maxIndex;
+        if (p[j] > max[j])
+            return i;
+    }
+    // all the same: this only happens with duplicates, which shouldn't be in the set
+    return maxIndex;
+}
+/**
+ * @ignore
+ */
+function minimize(i, minIndex, points, d) {
+    var p = points[i];
+    var min = points[minIndex];
+    for (var j = 0; j < d; ++j) {
+        if (p[j] > min[j])
+            return minIndex;
+        if (p[j] < min[j])
+            return i;
+    }
+    // all the same: this only happens with duplicates, which shouldn't be in the set
+    return minIndex;
+}
+/**
+ * Tries to find the biggest shape to start with
+ * @ignore
+ */
+function getOptimalStart(points, d) {
+    var numPoints = points.length;
+    var minIndex = 0;
+    var maxIndex = 0;
+    // the initial axis
+    for (var i = 1; i < numPoints; ++i) {
+        maxIndex = maximize(i, maxIndex, points, d);
+        minIndex = minimize(i, minIndex, points, d);
+    }
+    var indices = [minIndex, maxIndex];
+    var planePts = [points[minIndex], points[maxIndex]];
+    // already have 2 points, need d + 1 in total
+    // in increasing dimensions, find the furthest from the current hyperplane
+    for (var i = 2; i < d + 1; ++i) {
+        var plane = hyperplaneFromPoints(planePts);
+        var maxDist = -Infinity;
+        var p = -1;
+        for (var j = 0; j < numPoints; ++j) {
+            var dist = Math.abs(signedDistToPlane(points[j], plane, i));
+            if (dist > maxDist) {
+                maxDist = dist;
+                p = j;
+            }
+        }
+        indices.push(p);
+        planePts.push(points[p]);
+    }
+    return indices;
+}
+/**
+ * QuickHull implements the algorithm of the same name, based on the original paper by Barber, Dobkin and Huhdanpaa.
+ * We're not interested in 0- or 1-dimensional cases (the latter can simply be sorted points). QuickHull returns a
+ * set of indices into the original point list so we can map it to a different original ata set (fe: points may be a
+ * mapping for position vectors on some scene graph object).
+ *
+ * @author derschmale <http://www.derschmale.com>
+ */
+function quickHull(points) {
+    var numPoints = points.length;
+    if (numPoints === 0)
+        return;
+    var d = dim(points[0]);
+    if (numPoints <= d) {
+        console.log("A convex hull in " + d + " dimensions requires at least " + (d + 1) + " points.");
+    }
+    // initial unprocessed point indices:
+    var indices = [];
+    for (var i = 0; i < numPoints; ++i)
+        indices.push(i);
+    var simplexIndices = getOptimalStart(points, d);
+    var centroid = createCentroid(points, d, simplexIndices);
+    var facets = createSimplex(points, d, simplexIndices);
+    for (var _i = 0, facets_2 = facets; _i < facets_2.length; _i++) {
+        var f = facets_2[_i];
+        f.meta = new FacetInfo();
+    }
+    // sorting them in descending order makes them easy to delete optimally
+    simplexIndices.sort(function (a, b) { return b - a; });
+    for (var i = 0; i < d + 1; ++i) {
+        removeIndexOutOfOrder(indices, simplexIndices[i]);
+    }
+    shuffle(indices);
+    generateOutsideSets(indices, points, facets, d);
+    // do not cache facets.length, as it will keep changing
+    var done = false;
+    // TODO: this extra loop should not be required
+    while (!done) {
+        done = true;
+        for (var i = 0; i < facets.length; ++i) {
+            var facet = facets[i];
+            var p = getFurthestPoint(facet);
+            if (p !== -1) {
+                removeElementOutOfOrder(facet.meta.outsideSet, p);
+                var V = [];
+                var H = [];
+                getVisibleSet(points[p], facet, V, H, d);
+                var newFacets = connectHorizonRidges(points, p, H, centroid, d);
+                for (var _a = 0, V_1 = V; _a < V_1.length; _a++) {
+                    var v = V_1[_a];
+                    if (removeElementOutOfOrder(facets, v) <= i)
+                        --i;
+                    generateOutsideSets(v.meta.outsideSet, points, newFacets, d);
+                    if (v.meta.outsideSet.length > 0)
+                        done = false;
+                }
+                facets.push.apply(facets, newFacets);
+            }
+        }
+    }
+    for (var _b = 0, facets_3 = facets; _b < facets_3.length; _b++) {
+        var f = facets_3[_b];
+        f.meta = null;
+    }
+    return facets;
+}
+
+/**
+ * 🎵🎶🎵  I lift you up to a higher dimension  🎶🎵🎶
+ * 🎶🎵🎶     I'm gonna make you paraboloid     🎵🎶🎵
+ *
+ * @ignore
+ */
+function lift(points, d) {
+    var liftedDim = d + 1;
+    var numPoints = points.length;
+    // cache coherency
+    var byteSize = liftedDim << 2; // every lifted point takes up 4 bytes per float
+    var arr = new ArrayBuffer((numPoints + 1) * byteSize); // add room for one upper bound
+    var i = 0;
+    var bound = 0;
+    var lifted = points.map(function (p) {
+        var f = new Float32Array(arr, i, liftedDim);
+        var s = 0;
+        for (var j = 0; j < d; ++j) {
+            var e = p[j];
+            // the random factor is cheating, but it seems to solve some precision errors if everything is on a grid
+            f[j] = e;
+            s += e * e;
+        }
+        f[d] = s;
+        if (s > bound)
+            bound = s;
+        i += byteSize;
+        return f;
+    });
+    // add a bounding point to increase robustness, will be filtered out on plane side test
+    var boundPt = new Float32Array(arr, numPoints * byteSize, liftedDim);
+    for (var i_1 = 0; i_1 < d; ++i_1) {
+        boundPt[i_1] = 0;
+    }
+    boundPt[d] = bound * 10.0;
+    lifted.push(boundPt);
+    return lifted;
+}
+/**
+ * Calculates the Delaunay triangulation (or tetrahedralization) of a set of points.
+ * @param points
+ *
+ * @author derschmale <http://www.derschmale.com>
+ */
+function delaunay(points) {
+    var d = dim(points[0]);
+    if (points.length === d + 1) {
+        return quickHull(points);
+    }
+    var lifted = lift(points, d);
+    var hull = quickHull(lifted);
+    return hull.filter(function (f) {
+        return f.plane[d] < 0.0;
+    });
+}
+
+export { Facet, Ridge, createSimplex, delaunay, quickHull };

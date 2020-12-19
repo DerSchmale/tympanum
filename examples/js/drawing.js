@@ -79,6 +79,9 @@ function initCanvas(canvas, drawFunc) {
                 else
                     ctx.lineTo(...c);
             }
+
+            if (numRidges > 2)
+                ctx.lineTo(...indexToScreen(ridge.verts[0], points));
         }
     }
 
@@ -118,10 +121,18 @@ function initCanvas(canvas, drawFunc) {
     {
         ctx.beginPath();
         ctx.strokeStyle = strokeStyle || "green";
-        ctx.lineWidth = lineWidth || 2;
+        ctx.lineWidth = lineWidth || 1;
 
+        // let i = 0;
         facets.forEach(facet => {
-            drawFacet(facet, points);
+            // ctx.beginPath();
+            // setTimeout(() => {
+            //     ctx.beginPath();
+                drawFacet(facet, points);
+            //     ctx.stroke();
+            // }, i);
+
+            // i += 1000;
         });
 
         ctx.stroke();

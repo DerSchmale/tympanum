@@ -19,7 +19,7 @@ export default [{
         {
             file: "build/tympanum.module.js",
             format: "es",
-            plugins: [terser()]
+            // plugins: [terser()]
         }
     ],
     plugins: [
