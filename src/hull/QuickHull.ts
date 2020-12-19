@@ -5,6 +5,9 @@ import { createSimplex } from "../geom/Simplex";
 import { findNeighbor, generateFacetPlane } from "../geom/utils";
 import { removeElementOutOfOrder, removeIndexOutOfOrder, shuffle } from "@derschmale/array-utils";
 
+/**
+ * @ignore
+ */
 const eps = 0.0001;
 
 /**

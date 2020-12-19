@@ -100,7 +100,7 @@
 					<div class="tsd-signature tsd-kind-icon">Vector<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Float32Array</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/38e2e58/src/types.ts#L4">types.ts:4</a></li>
+							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/8f98f11/src/types.ts#L4">types.ts:4</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -116,13 +116,13 @@
 					<a name="createsimplex" class="tsd-anchor"></a>
 					<h3>create<wbr>Simplex</h3>
 					<ul class="tsd-signatures tsd-kind-function">
-						<li class="tsd-signature tsd-kind-icon">create<wbr>Simplex<span class="tsd-signature-symbol">(</span>points<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span>, dim<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">create<wbr>Simplex<span class="tsd-signature-symbol">(</span>points<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span>, dim<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, indices<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/38e2e58/src/geom/Simplex.ts#L13">geom/Simplex.ts:13</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/8f98f11/src/geom/Simplex.ts#L14">geom/Simplex.ts:14</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -149,6 +149,12 @@
 										<p>The dimension of the simplex.</p>
 									</div>
 								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> indices: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>An optional array of indices into points to remap which points are used</p>
+									</div>
+								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span></h4>
 						</li>
@@ -158,13 +164,13 @@
 					<a name="delaunay" class="tsd-anchor"></a>
 					<h3>delaunay</h3>
 					<ul class="tsd-signatures tsd-kind-function">
-						<li class="tsd-signature tsd-kind-icon">delaunay<span class="tsd-signature-symbol">(</span>points<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">delaunay<span class="tsd-signature-symbol">(</span>points<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/38e2e58/src/tri/Delaunay.ts#L9">tri/Delaunay.ts:9</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/8f98f11/src/tri/Delaunay.ts#L61">tri/Delaunay.ts:61</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -185,7 +191,7 @@
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -199,7 +205,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/38e2e58/src/hull/QuickHull.ts#L181">hull/QuickHull.ts:181</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/8f98f11/src/hull/QuickHull.ts#L265">hull/QuickHull.ts:265</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
