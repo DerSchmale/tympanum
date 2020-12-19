@@ -52,7 +52,7 @@ let hull = quickHull(points);
 To generate the delaunay triangulation:
 
 ```
-import { quickHull } from "@derschmale/tympanum";
+import { delaunay } from "@derschmale/tympanum";
 
 let points = [];
 
@@ -60,7 +60,7 @@ for (let i = 0; i < 500; ++i) {
     points[i] = [Math.random(), Math.random(), Math.random()];
 }
 
-let triangulation = quickHull(points);
+let triangulation = delaunay(points);
 
 ```
 
