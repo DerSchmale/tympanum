@@ -3,6 +3,11 @@
 A Typescript library for multidimensional geometry code. There's not much in it, but may grow slightly as I need more
 functionality.
 
+# Documentation
+
+- [Reference documentation](https://derschmale.github.io/tympanum/docs/index.html)
+- [The original QuickHull algorithm](https://www.researchgate.net/publication/2641780_The_QuickHull_Algorithm_for_Convex_Hulls)
+
 # Examples:
 
 - [2D Quickhull](https://derschmale.github.io/tympanum/examples/convex_hull_2d/index.html)
