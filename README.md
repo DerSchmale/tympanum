@@ -12,6 +12,8 @@ functionality.
 
 - [2D Quickhull](https://derschmale.github.io/tympanum/examples/convex_hull_2d/index.html)
 - [3D Quickhull](https://derschmale.github.io/tympanum/examples/convex_hull_3d/index.html)
+- [2D Delaunay](https://derschmale.github.io/tympanum/examples/delaunay_2d/index.html)
+- [3D Delaunay](https://derschmale.github.io/tympanum/examples/delaunay_3d/index.html)
 
 ## Basic Types
 
@@ -44,3 +46,22 @@ let hull = quickHull(points);
 ```
 
 `hull` will contain an array of `Facet`.
+
+## Delaunay Triangulation
+
+To generate the delaunay triangulation:
+
+```
+import { quickHull } from "@derschmale/tympanum";
+
+let points = [];
+
+for (let i = 0; i < 500; ++i) {  
+    points[i] = [Math.random(), Math.random(), Math.random()];
+}
+
+let triangulation = quickHull(points);
+
+```
+
+`triangulation` will contain an array of `Facet`, but of a higher dimension than the convex hull would.
