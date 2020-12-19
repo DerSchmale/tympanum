@@ -1,10 +1,25 @@
 import { Vector } from "../types";
 
+/**
+ * Some basic N-dimensional vector math.
+ * @author derschmale <http://www.derschmale.com>
+ */
+
+/**
+ * Returns the dimension of a Vector.
+ *
+ * @ignore
+ */
 export function dim(v: Vector): number
 {
     return v.length;
 }
 
+/**
+ * The dot (inner) product of two vectors.
+ *
+ * @ignore
+ */
 export function dot(v1: Vector, v2: Vector): number
 {
     const dim = v1.length;
@@ -16,6 +31,11 @@ export function dot(v1: Vector, v2: Vector): number
     return d;
 }
 
+/**
+ * Normalizes a vector.
+ *
+ * @ignore
+ */
 export function normalize(v: Vector): Vector
 {
     const dim = v.length;
@@ -33,6 +53,11 @@ export function normalize(v: Vector): Vector
     return v;
 }
 
+/**
+ * Normalizes a plane encoded as a vector as (normal, offset).
+ *
+ * @ignore
+ */
 export function normalizePlane(v: Vector): Vector
 {
     const len = v.length;
@@ -50,6 +75,11 @@ export function normalizePlane(v: Vector): Vector
     return v;
 }
 
+/**
+ * Generates the cofactor matrix.
+ *
+ * @ignore
+ */
 function cofactor(mat: Vector[], tgt: Vector[], p: number, q: number, dim: number)
 {
     let i = 0, j = 0;
@@ -68,6 +98,11 @@ function cofactor(mat: Vector[], tgt: Vector[], p: number, q: number, dim: numbe
     }
 }
 
+/**
+ * Creates a new N-dimensional matrix.
+ *
+ * @ignore
+ */
 function getSquareMatrix(dim: number): Vector[]
 {
     let sub = [];
@@ -78,7 +113,11 @@ function getSquareMatrix(dim: number): Vector[]
     return sub;
 }
 
-// if this is a determinant for a submatrix, ij are the indices of the parent
+/**
+ * Calculates the determinant for a matrix.
+ *
+ * @ignore
+ */
 function det(v: Vector[], dim: number): number
 {
     if (dim === 1) {
@@ -106,7 +145,11 @@ function det(v: Vector[], dim: number): number
     }
 }
 
-// there's probably waaaay faster algos to do this
+/**
+ * Calculates the generalized cross product.
+ *
+ * @ignore
+ */
 function generalizedCross(v: Vector[], tgt?: Vector): Vector
 {
     const dim = v[0].length;
@@ -145,6 +188,12 @@ function generalizedCross(v: Vector[], tgt?: Vector): Vector
     return tgt;
 }
 
+/**
+ * Calculates the hyperplane that contains the given points. The amount of points defines the dimension of the
+ * hyperplane.
+ *
+ * @ignore
+ */
 export function hyperplaneFromPoints(p: Vector[], tgt?: Vector) {
     const dim = p.length;
     const v0 = p[0];
@@ -172,6 +221,11 @@ export function hyperplaneFromPoints(p: Vector[], tgt?: Vector) {
     return tgt;
 }
 
+/**
+ * Flips a vector.
+ *
+ * @ignore
+ */
 export function negate(v: Vector): Vector
 {
     const dim = v.length;
@@ -179,13 +233,19 @@ export function negate(v: Vector): Vector
         v[i] = -v[i];
     return v;
 }
-export function signedDistToPlane(v: Vector, p: Vector)
+
+/**
+ * Calculates the signed distance of a point to a plane.
+ *
+ * @ignore
+ */
+export function signedDistToPlane(point: Vector, plane: Vector)
 {
-    const dim = v.length;
-    let d = p[dim];
+    const dim = point.length;
+    let d = plane[dim];
 
     for (let i = 0; i < dim; ++i)
-        d += v[i] * p[i];
+        d += point[i] * plane[i];
 
     return d;
 }

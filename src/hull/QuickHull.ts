@@ -15,6 +15,11 @@ class FacetInfo
     currentPoint: Vector;   // used to keep track of visibility tests
 }
 
+/**
+ * Gets the point in an outside set that's the furthest from the facet plane.
+ *
+ * @ignore
+ */
 function getFurthestPoint(facet: Facet): number
 {
     const { outsideSet, outsideDist } = facet.meta;
@@ -35,8 +40,11 @@ function getFurthestPoint(facet: Facet): number
     return p;
 }
 
-// [face][setIndex][0/1] : 0 = index, 1 = signed distance to facet plane
-// assign points to the outside set of a collection of faces
+/**
+ * Assigns all points to the outside sets of a face.
+ *
+ * @ignore
+ */
 function generateOutsideSets(indices: number[], points: Vector[], facets: Facet[])
 {
     let outsideSets = facets.map(_ => []);
@@ -62,6 +70,11 @@ function generateOutsideSets(indices: number[], points: Vector[], facets: Facet[
     return outsideSets;
 }
 
+/**
+ * Finds all faces visible to a point and their boundary ridges.
+ *
+ * @ignore
+ */
 function getVisibleSet(p: Vector, facet: Facet, visible: Facet[], horizon: Ridge[])
 {
     visible.push(facet);
@@ -80,6 +93,11 @@ function getVisibleSet(p: Vector, facet: Facet, visible: Facet[], horizon: Ridge
     }
 }
 
+/**
+ * Builds a new face from a ridge and a point.
+ *
+ * @ignore
+ */
 function attachNewFacet(ridge: Ridge, p: number, points: Vector[], facets: Facet[], centroid: Vector, dim: number): Facet
 {
     // in 2D, we simply need to create 1 new facet (line) from old ridge to p
@@ -114,6 +132,11 @@ function attachNewFacet(ridge: Ridge, p: number, points: Vector[], facets: Facet
     return newFacet;
 }
 
+/**
+ * Builds a set of new facets for a point and its horizon ridges.
+ *
+ * @ignore
+ */
 function connectHorizonRidges(points: Vector[], index: number, H: Ridge[], centroid: Vector, dim: number): Facet[]
 {
     const newFacets = [];
@@ -127,6 +150,11 @@ function connectHorizonRidges(points: Vector[], index: number, H: Ridge[], centr
     return newFacets;
 }
 
+/**
+ * Creates the centroid for a collection of d points.
+ *
+ * @ignore
+ */
 function createCentroid(points: Vector[], d: number): Vector
 {
     // a point that will be internal from the very first simplex. Used to correctly orient new planes

@@ -13,7 +13,8 @@
     "url": "https://github.com/DerSchmale/tympanum.git"
   },
   "scripts": {
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "docs": "typedoc --out ./docs/ ./src/ --mode file"
   },
   "license": "MIT",
   "dependencies": {

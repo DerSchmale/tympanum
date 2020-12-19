@@ -1,0 +1,283 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>@derschmale/tympanum</title>
+	<meta name="description" content="Documentation for @derschmale/tympanum">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">@derschmale/tympanum</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>@derschmale/tympanum</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Classes</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-class"><a href="classes/facet.html" class="tsd-kind-icon">Facet</a></li>
+								<li class="tsd-kind-class"><a href="classes/facetinfo.html" class="tsd-kind-icon">Facet<wbr>Info</a></li>
+								<li class="tsd-kind-class"><a href="classes/ridge.html" class="tsd-kind-icon">Ridge</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Type aliases</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-type-alias"><a href="globals.html#vector" class="tsd-kind-icon">Vector</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Functions</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-function"><a href="globals.html#createsimplex" class="tsd-kind-icon">create<wbr>Simplex</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#delaunay" class="tsd-kind-icon">delaunay</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#quickhull" class="tsd-kind-icon">quick<wbr>Hull</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Type aliases</h2>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias">
+					<a name="vector" class="tsd-anchor"></a>
+					<h3>Vector</h3>
+					<div class="tsd-signature tsd-kind-icon">Vector<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Float32Array</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/38e2e58/src/types.ts#L4">types.ts:4</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Vector is the representation for any N-dimensional vector. This can be either an array of numbers, or a Float32Array.</p>
+						</div>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Functions</h2>
+				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="createsimplex" class="tsd-anchor"></a>
+					<h3>create<wbr>Simplex</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">create<wbr>Simplex<span class="tsd-signature-symbol">(</span>points<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span>, dim<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/38e2e58/src/geom/Simplex.ts#L13">geom/Simplex.ts:13</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Creates an N-simplex from N+1 points.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>author</dt>
+									<dd><p>derschmale <a href="http://www.derschmale.com">http://www.derschmale.com</a></p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>points: <a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>An array of points. Only the first N+1 points are used.</p>
+									</div>
+								</li>
+								<li>
+									<h5>dim: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The dimension of the simplex.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="delaunay" class="tsd-anchor"></a>
+					<h3>delaunay</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">delaunay<span class="tsd-signature-symbol">(</span>points<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/38e2e58/src/tri/Delaunay.ts#L9">tri/Delaunay.ts:9</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Calculates the Delaunay triangulation (or tetrahedralization) of a set of points.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>author</dt>
+									<dd><p>derschmale <a href="http://www.derschmale.com">http://www.derschmale.com</a></p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>points: <a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="quickhull" class="tsd-anchor"></a>
+					<h3>quick<wbr>Hull</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">quick<wbr>Hull<span class="tsd-signature-symbol">(</span>points<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/38e2e58/src/hull/QuickHull.ts#L181">hull/QuickHull.ts:181</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>QuickHull implements the algorithm of the same name, based on the original paper by Barber, Dobkin and Huhdanpaa.
+										We&#39;re not interested in 0- or 1-dimensional cases (the latter can simply be sorted points). QuickHull returns a
+										set of indices into the original point list so we can map it to a different original ata set (fe: points may be a
+									mapping for position vectors on some scene graph object).</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>author</dt>
+									<dd><p>derschmale <a href="http://www.derschmale.com">http://www.derschmale.com</a></p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>points: <a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals current ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class">
+						<a href="classes/facet.html" class="tsd-kind-icon">Facet</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/facetinfo.html" class="tsd-kind-icon">Facet<wbr>Info</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/ridge.html" class="tsd-kind-icon">Ridge</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#vector" class="tsd-kind-icon">Vector</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#createsimplex" class="tsd-kind-icon">create<wbr>Simplex</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#delaunay" class="tsd-kind-icon">delaunay</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#quickhull" class="tsd-kind-icon">quick<wbr>Hull</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
