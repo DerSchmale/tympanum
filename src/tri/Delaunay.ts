@@ -70,6 +70,13 @@ export function delaunay(points: Vector[]): Facet[]
     const hull = quickHull(lifted);
 
     return hull.filter(f => {
-        return f.plane[d] < 0.0;
+        // remove all upwards facing faces and ridges
+        if (f.plane[d] >= 0.0) {
+            for (let r of f.ridges)
+                if (r.neighbor) r.neighbor.neighbor = null;
+
+            return false;
+        }
+        return true;
     });
 }

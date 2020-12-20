@@ -300,7 +300,8 @@ var TYMP = (function (exports) {
     }
     /**
      * Generates the ridges for a facet based on the vertices contained in it. If ridges are already present, they're
-     * considered already built and only the missing ones will be added (used only when connecting ridges).
+     * considered already built and only the missing ones will be added (used only when connecting ridges). In this
+     * case, the order of vertices MUST match that of the present ridges.
      *
      * @ignore
      */
@@ -711,7 +712,16 @@ var TYMP = (function (exports) {
         var lifted = lift(points, d);
         var hull = quickHull(lifted);
         return hull.filter(function (f) {
-            return f.plane[d] < 0.0;
+            // remove all upwards facing faces and ridges
+            if (f.plane[d] >= 0.0) {
+                for (var _i = 0, _a = f.ridges; _i < _a.length; _i++) {
+                    var r = _a[_i];
+                    if (r.neighbor)
+                        r.neighbor.neighbor = null;
+                }
+                return false;
+            }
+            return true;
         });
     }
 

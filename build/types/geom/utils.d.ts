@@ -25,3 +25,11 @@ export declare function findNeighbor(facet: Facet, ridge: Ridge, facets: Facet[]
  * @ignore
  */
 export declare function generateFacetPlane(facet: Facet, points: Vector[], dim: number, centroid?: Vector): void;
+/**
+ * Generates the ridges for a facet based on the vertices contained in it. If ridges are already present, they're
+ * considered already built and only the missing ones will be added (used only when connecting ridges). In this
+ * case, the order of vertices MUST match that of the present ridges.
+ *
+ * @ignore
+ */
+export declare function buildRidges(facet: Facet, facets: Facet[], dim: number): void;
