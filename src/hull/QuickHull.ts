@@ -232,6 +232,7 @@ export function quickHull(points: Vector[]): Facet[]
         f.meta = new FacetInfo();
 
     removeIndicesOutOfOrder(indices, simplexIndices);
+
     shuffle(indices);
 
     generateOutsideSets(indices, points, facets, d);
