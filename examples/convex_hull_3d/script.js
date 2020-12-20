@@ -37,7 +37,7 @@ import {quickHull} from "../../build/tympanum.module.js";
     {
         points = [];
 
-        for (let i = 0; i < 5000; ++i) {
+        for (let i = 0; i < 500; ++i) {
             let azim = Math.random() * Math.PI * 2.0;
             let pol = (Math.random() - .5) * Math.PI * 2.0;
             let rad = Math.random();

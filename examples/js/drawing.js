@@ -22,6 +22,16 @@ function initCanvas(canvas, drawFunc) {
         return toScreen(points[p]);
     }
 
+    function screenTo2D(x, y)
+    {
+        const span = h * .75 * .5;
+
+        return [
+            (x - w * .5) / span,
+            (y - h * .5) / span,
+        ];
+    }
+
     function toScreen(p)
     {
         const span = h * .75 * .5;
@@ -85,6 +95,32 @@ function initCanvas(canvas, drawFunc) {
         }
     }
 
+    function drawRidgeNormal(ridge, points, length)
+    {
+        const numVerts = ridge.verts.length;
+        const dim = points[0].length;
+        const p = new Float32Array(dim);
+
+        length = length || 0.05;
+
+        for (let i = 0; i < dim; ++i) {
+            for (let v = 0; v < numVerts; ++v) {
+                const vert = points[ridge.verts[v]];
+                p[i] += vert[i];
+            }
+            p[i] /= numVerts;
+        }
+
+        ctx.moveTo(...toScreen(p));
+
+        const plane = ridge.getPlane(points);
+        for (let i = 0; i < dim; ++i) {
+            p[i] += plane[i] * length;
+        }
+
+        ctx.lineTo(...toScreen(p));
+    }
+
     function drawFacetNormal(facet, points, length)
     {
         const numRidges = facet.ridges.length;
@@ -123,16 +159,29 @@ function initCanvas(canvas, drawFunc) {
         ctx.strokeStyle = strokeStyle || "green";
         ctx.lineWidth = lineWidth || 1;
 
-        // let i = 0;
         facets.forEach(facet => {
-            // ctx.beginPath();
-            // setTimeout(() => {
-            //     ctx.beginPath();
-                drawFacet(facet, points);
-            //     ctx.stroke();
-            // }, i);
+            drawFacet(facet, points);
+        });
 
-            // i += 1000;
+        ctx.stroke();
+    }
+
+    function fillFacet(facet, points, fillStyle)
+    {
+        ctx.beginPath();
+        ctx.fillStyle = fillStyle || "white";
+        drawFacet(facet, points);
+        ctx.fill();
+    }
+
+    function drawRidgeNormals(ridges, points, length, strokeStyle, lineWidth)
+    {
+        ctx.beginPath();
+        ctx.strokeStyle = strokeStyle || "red";
+        ctx.lineWidth = lineWidth || 1;
+
+        ridges.forEach(ridge => {
+            drawRidgeNormal(ridge, points, length);
         });
 
         ctx.stroke();
@@ -156,6 +205,9 @@ function initCanvas(canvas, drawFunc) {
         drawPoints,
         drawFacets,
         drawFacetNormals,
+        drawRidgeNormals,
+        fillFacet,
+        screenTo2D,
         get rotation() { return rotation; },
         set rotation(value) { rotation = value; },
         get zOffset() { return zOffset; },

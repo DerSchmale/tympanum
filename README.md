@@ -12,8 +12,9 @@ functionality.
 
 - [2D Quickhull](https://derschmale.github.io/tympanum/examples/convex_hull_2d/index.html)
 - [3D Quickhull](https://derschmale.github.io/tympanum/examples/convex_hull_3d/index.html)
-- [2D Delaunay](https://derschmale.github.io/tympanum/examples/delaunay_2d/index.html)
-- [3D Delaunay](https://derschmale.github.io/tympanum/examples/delaunay_3d/index.html)
+- [2D Delaunay Triangulation](https://derschmale.github.io/tympanum/examples/delaunay_2d/index.html)
+- [3D Delaunay Tetrahedralisation](https://derschmale.github.io/tympanum/examples/delaunay_3d/index.html)
+- [Delaunay facet search using visibility walking](https://derschmale.github.io/tympanum/examples/walk_2d/index.html)
 
 ## Basic Types
 
@@ -35,13 +36,13 @@ To generate a convex hull using the quickHull algorithm:
 ```
 import { quickHull } from "@derschmale/tympanum";
 
-let points = [];
+const points = [];
 
 for (let i = 0; i < 5000; ++i) {  
     points[i] = [Math.random(), Math.random(), Math.random()];
 }
 
-let hull = quickHull(points);
+const hull = quickHull(points);
 
 ```
 
@@ -54,14 +55,24 @@ To generate the delaunay triangulation:
 ```
 import { delaunay } from "@derschmale/tympanum";
 
-let points = [];
+const points = [];
 
 for (let i = 0; i < 500; ++i) {  
     points[i] = [Math.random(), Math.random(), Math.random()];
 }
 
-let triangulation = delaunay(points);
+const triangulation = delaunay(points);
 
 ```
 
 `triangulation` will contain an array of `Facet`, but of a higher dimension than the convex hull would.
+
+Delaunay triangulations allow searching for facets containing a point efficiently using the vibility walk algorithm:
+
+```
+import { visibilityWalk } from "@derschmale/tympanum";
+
+const pos = [ 0.5, 0.2, 0.7 ];
+const facet = visibilityWalk(pos, triangulation, points);
+
+```

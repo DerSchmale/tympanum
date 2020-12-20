@@ -1,4 +1,6 @@
 import { Vector } from "../types";
+import { Ridge } from "../geom/Geometry";
+import { EPSILON } from "../constants";
 
 /**
  * Some basic N-dimensional vector math.
@@ -215,9 +217,8 @@ export function hyperplaneFromPoints(p: Vector[], tgt?: Vector) {
         const pt = p[i];
         const v = [];
 
-        for (let j = 0; j < dim; ++j) {
-            v[j] = pt[j] - v0[j];
-        }
+        for (let j = 0; j < dim; ++j)
+            v[j] = v0[j] - pt[j];
 
         vecs.push(v);
     }
@@ -227,7 +228,6 @@ export function hyperplaneFromPoints(p: Vector[], tgt?: Vector) {
 
     // calculate offset
     tgt[dim] = -dot(v0, tgt, dim);
-    // not sure if this is necessary
     normalizePlane(tgt);
     return tgt;
 }
@@ -250,12 +250,41 @@ export function negate(v: Vector): Vector
  *
  * @ignore
  */
-export function signedDistToPlane(point: Vector, plane: Vector, dim: number)
+export function signedDistToPlane(point: Vector, plane: Vector, dim: number = -1)
 {
+    if (dim === -1)
+        dim = point.length;
+
     let d = plane[dim];
 
     for (let i = 0; i < dim; ++i)
         d += point[i] * plane[i];
 
     return d;
+}
+
+/**
+ * Calculates the intersection with a ridge's hyperplane and a ray
+ *
+ * @param origin The origin of the ray.
+ * @param dir The direction of the ray. Doesn't need to be normalized. When testing segments, this is (end - start).
+ * @param plane The plane to test against.
+ * @param dim The dimension.
+ * @param startsInside Set to true if we're testing for intersections of planes of a convex solid and the start
+ * point is inside. Used for early rejection tests if the planes are facing away from the ray.
+ *
+ * @ignore
+ */
+export function intersectRayPlane(origin: Vector, dir: Vector, plane: Vector, dim: number, startsInside: boolean = false): number
+{
+    // assuming vectors are all normalized
+    const denom = dot(plane, dir, dim);
+    const abs = Math.abs(denom);
+
+    // not parallel + must be traveling in the same direction if it starts inside
+    if (abs > 0.0 && (!startsInside || denom > 0.0)) {
+        return -signedDistToPlane(origin, plane, dim) / denom;
+    }
+
+    return -1;
 }

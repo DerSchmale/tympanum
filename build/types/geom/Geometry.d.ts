@@ -28,10 +28,15 @@ export declare class Ridge {
      * The facet to which this ridge belongs.
      */
     facet: Facet;
+    private _plane;
     /**
      * Creates a new ridge belonging to a facet
      */
     constructor(facet: Facet);
+    /**
+     * The plane containing the ridge. Once created it remains cached.
+     */
+    getPlane(points: Vector[]): Vector;
 }
 /**
  * In N dimensions, a facet forms an N-1 "polygon" which can be combined into an N-dimensional shape such as a

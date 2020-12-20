@@ -52,6 +52,7 @@ export declare function extendRidge(ridge: Ridge, p: number, points: Vector[], f
  * @param points The array containing all point coordinates.
  * @param indices The indices of the points for which to calculate the averages. If not provided, the first N+1
  * (simplex) points are used from the points array.
+ * @param target An optional target to store the centroid in.
  * @ignore
  */
-export declare function createCentroid(points: Vector[], indices?: number[]): Vector;
+export declare function createCentroid(points: Vector[], indices?: number[], target?: Vector): Vector;

@@ -48,4 +48,17 @@ export declare function negate(v: Vector): Vector;
  *
  * @ignore
  */
-export declare function signedDistToPlane(point: Vector, plane: Vector, dim: number): number;
+export declare function signedDistToPlane(point: Vector, plane: Vector, dim?: number): number;
+/**
+ * Calculates the intersection with a ridge's hyperplane and a ray
+ *
+ * @param origin The origin of the ray.
+ * @param dir The direction of the ray. Doesn't need to be normalized. When testing segments, this is (end - start).
+ * @param plane The plane to test against.
+ * @param dim The dimension.
+ * @param startsInside Set to true if we're testing for intersections of planes of a convex solid and the start
+ * point is inside. Used for early rejection tests if the planes are facing away from the ray.
+ *
+ * @ignore
+ */
+export declare function intersectRayPlane(origin: Vector, dir: Vector, plane: Vector, dim: number, startsInside?: boolean): number;

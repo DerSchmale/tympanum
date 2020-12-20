@@ -57,18 +57,14 @@ export function findNeighbor(facet: Facet, ridge: Ridge, facets: Facet[]): void
 export function generateFacetPlane(facet: Facet, points: Vector[], dim: number, centroid?: Vector): void
 {
     const verts = facet.ridges.map(r => points[r.verts[0]]);
-
-    let plane = facet.plane = hyperplaneFromPoints(verts);
-
+    const plane = facet.plane = hyperplaneFromPoints(verts);
 
     if (centroid && signedDistToPlane(centroid, plane, dim) > 0.0) {
         negate(plane);
 
-        facet.verts.reverse();
-
         // flip ridges for consistency
+        facet.verts.reverse();
         facet.ridges.reverse();
-
         for (let r of facet.ridges)
             r.verts.reverse();
     }
@@ -137,22 +133,32 @@ export function extendRidge(ridge: Ridge, p: number, points: Vector[], facets: F
  * @param points The array containing all point coordinates.
  * @param indices The indices of the points for which to calculate the averages. If not provided, the first N+1
  * (simplex) points are used from the points array.
+ * @param target An optional target to store the centroid in.
  * @ignore
  */
-export function createCentroid(points: Vector[], indices?: number[]): Vector
+export function createCentroid(points: Vector[], indices?: number[], target?:Vector): Vector
 {
-    // a point that will be internal from the very first simplex. Used to correctly orient new planes
-    const centroid = points[0].slice();
-    const dim = centroid.length;
+    const index = indices? indices[0] : 0;
+    const p0 = points[index];
+    const dim = p0.length;
     const numPoints = indices? indices.length : dim + 1;
+    // a point that will be internal from the very first simplex. Used to correctly orient new planes
+
+    if (target) {
+        for (let j = 0; j < dim; ++j)
+            target[j] = p0[j];
+    }
+    else {
+        target = p0.slice();
+    }
 
     for (let j = 0; j < dim; ++j) {
         for (let i = 1; i < numPoints; ++i) {
-            let index = indices[i];
-            centroid[j] += points[index][j];
+            const index = indices? indices[i] : i;
+            target[j] += points[index][j];
         }
-        centroid[j] /= numPoints;
+        target[j] /= numPoints;
     }
 
-    return centroid;
+    return target;
 }

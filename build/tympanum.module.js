@@ -1,53 +1,4 @@
 /**
- * Base geometry elements.
- *
- * @author derschmale <http://www.derschmale.com>
- */
-/**
- * Ridge is a face of a facet, represented as the set of vertices forming the ridge. A line facet contains 2 ridges
- * each containing a single point. A triangle facet contains 3 ridges containing 2 vertices (segment end points), a
- * tetrahedral facet contains 4 face ridges (each containing the three triangle vertices).
- */
-var Ridge = /** @class */ (function () {
-    /**
-     * Creates a new ridge belonging to a facet
-     */
-    function Ridge(facet) {
-        /**
-         * The vertices of the ridge. These are always the points forming the ridge. Represented as indices into an external
-         * point array.
-         */
-        this.verts = [];
-        this.facet = facet;
-    }
-    return Ridge;
-}());
-/**
- * In N dimensions, a facet forms an N-1 "polygon" which can be combined into an N-dimensional shape such as a
- * simplex, a convex hull, a triangulation, ...
- * A facet consists out of ridges and vertices. Care has to be taken during construction that the vertices and
- * ridges are in consistent order. The ridge's vertices must be a looping slice of (size-1) of the facet's vertices
- * starting at its corresponding index, ie:
- * - Every ridge at index I must start with the corresponding vertex at index I.
- * - If this ridge at index I stores a vertex at index N, the facet's vertex index must be (N + I) % numVerts.
- */
-var Facet = /** @class */ (function () {
-    function Facet() {
-        /**
-         * The set of ridges for the facet. Ridges are a dimension lower than the facet (ie: points for lines, edges for
-         * triangles, faces for tetrahedrons).
-         */
-        this.ridges = [];
-        /**
-         * The vertices of the facet. Represented as indices into an external point array. While they're also contained
-         * in the ridges, it's useful for calculating barycentric coordinates for a facet.
-         */
-        this.verts = [];
-    }
-    return Facet;
-}());
-
-/**
  * Some basic N-dimensional vector math.
  * @author derschmale <http://www.derschmale.com>
  */
@@ -205,16 +156,14 @@ function hyperplaneFromPoints(p, tgt) {
     for (var i = 1; i < dim; ++i) {
         var pt = p[i];
         var v = [];
-        for (var j = 0; j < dim; ++j) {
-            v[j] = pt[j] - v0[j];
-        }
+        for (var j = 0; j < dim; ++j)
+            v[j] = v0[j] - pt[j];
         vecs.push(v);
     }
     // calculate normal for hyperplane
     generalizedCross(vecs, tgt);
     // calculate offset
     tgt[dim] = -dot(v0, tgt, dim);
-    // not sure if this is necessary
     normalizePlane(tgt);
     return tgt;
 }
@@ -235,11 +184,94 @@ function negate(v) {
  * @ignore
  */
 function signedDistToPlane(point, plane, dim) {
+    if (dim === void 0) { dim = -1; }
+    if (dim === -1)
+        dim = point.length;
     var d = plane[dim];
     for (var i = 0; i < dim; ++i)
         d += point[i] * plane[i];
     return d;
 }
+/**
+ * Calculates the intersection with a ridge's hyperplane and a ray
+ *
+ * @param origin The origin of the ray.
+ * @param dir The direction of the ray. Doesn't need to be normalized. When testing segments, this is (end - start).
+ * @param plane The plane to test against.
+ * @param dim The dimension.
+ * @param startsInside Set to true if we're testing for intersections of planes of a convex solid and the start
+ * point is inside. Used for early rejection tests if the planes are facing away from the ray.
+ *
+ * @ignore
+ */
+function intersectRayPlane(origin, dir, plane, dim, startsInside) {
+    if (startsInside === void 0) { startsInside = false; }
+    // assuming vectors are all normalized
+    var denom = dot(plane, dir, dim);
+    var abs = Math.abs(denom);
+    // not parallel + must be traveling in the same direction if it starts inside
+    if (abs > 0.0 && (!startsInside || denom > 0.0)) {
+        return -signedDistToPlane(origin, plane, dim) / denom;
+    }
+    return -1;
+}
+
+/**
+ * Base geometry elements.
+ *
+ * @author derschmale <http://www.derschmale.com>
+ */
+/**
+ * Ridge is a face of a facet, represented as the set of vertices forming the ridge. A line facet contains 2 ridges
+ * each containing a single point. A triangle facet contains 3 ridges containing 2 vertices (segment end points), a
+ * tetrahedral facet contains 4 face ridges (each containing the three triangle vertices).
+ */
+var Ridge = /** @class */ (function () {
+    /**
+     * Creates a new ridge belonging to a facet
+     */
+    function Ridge(facet) {
+        /**
+         * The vertices of the ridge. These are always the points forming the ridge. Represented as indices into an external
+         * point array.
+         */
+        this.verts = [];
+        this.facet = facet;
+    }
+    /**
+     * The plane containing the ridge. Once created it remains cached.
+     */
+    Ridge.prototype.getPlane = function (points) {
+        if (!this._plane)
+            this._plane = hyperplaneFromPoints(this.verts.map(function (i) { return points[i]; }));
+        return this._plane;
+    };
+    return Ridge;
+}());
+/**
+ * In N dimensions, a facet forms an N-1 "polygon" which can be combined into an N-dimensional shape such as a
+ * simplex, a convex hull, a triangulation, ...
+ * A facet consists out of ridges and vertices. Care has to be taken during construction that the vertices and
+ * ridges are in consistent order. The ridge's vertices must be a looping slice of (size-1) of the facet's vertices
+ * starting at its corresponding index, ie:
+ * - Every ridge at index I must start with the corresponding vertex at index I.
+ * - If this ridge at index I stores a vertex at index N, the facet's vertex index must be (N + I) % numVerts.
+ */
+var Facet = /** @class */ (function () {
+    function Facet() {
+        /**
+         * The set of ridges for the facet. Ridges are a dimension lower than the facet (ie: points for lines, edges for
+         * triangles, faces for tetrahedrons).
+         */
+        this.ridges = [];
+        /**
+         * The vertices of the facet. Represented as indices into an external point array. While they're also contained
+         * in the ridges, it's useful for calculating barycentric coordinates for a facet.
+         */
+        this.verts = [];
+    }
+    return Facet;
+}());
 
 /**
  * Some shape construction and query code used internally.
@@ -294,8 +326,8 @@ function generateFacetPlane(facet, points, dim, centroid) {
     var plane = facet.plane = hyperplaneFromPoints(verts);
     if (centroid && signedDistToPlane(centroid, plane, dim) > 0.0) {
         negate(plane);
-        facet.verts.reverse();
         // flip ridges for consistency
+        facet.verts.reverse();
         facet.ridges.reverse();
         for (var _i = 0, _a = facet.ridges; _i < _a.length; _i++) {
             var r = _a[_i];
@@ -355,21 +387,30 @@ function extendRidge(ridge, p, points, facets, insidePoint, dim) {
  * @param points The array containing all point coordinates.
  * @param indices The indices of the points for which to calculate the averages. If not provided, the first N+1
  * (simplex) points are used from the points array.
+ * @param target An optional target to store the centroid in.
  * @ignore
  */
-function createCentroid(points, indices) {
-    // a point that will be internal from the very first simplex. Used to correctly orient new planes
-    var centroid = points[0].slice();
-    var dim = centroid.length;
+function createCentroid(points, indices, target) {
+    var index = indices ? indices[0] : 0;
+    var p0 = points[index];
+    var dim = p0.length;
     var numPoints = indices ? indices.length : dim + 1;
+    // a point that will be internal from the very first simplex. Used to correctly orient new planes
+    if (target) {
+        for (var j = 0; j < dim; ++j)
+            target[j] = p0[j];
+    }
+    else {
+        target = p0.slice();
+    }
     for (var j = 0; j < dim; ++j) {
         for (var i = 1; i < numPoints; ++i) {
-            var index = indices[i];
-            centroid[j] += points[index][j];
+            var index_1 = indices ? indices[i] : i;
+            target[j] += points[index_1][j];
         }
-        centroid[j] /= numPoints;
+        target[j] /= numPoints;
     }
-    return centroid;
+    return target;
 }
 
 /**
@@ -468,7 +509,8 @@ function removeElementOutOfOrder(target, elm) {
 /**
  * @ignore
  */
-var eps = 0.0001;
+var EPSILON = 0.0001;
+
 /**
  * Some meta-data while constructing the facets
  */
@@ -513,7 +555,7 @@ function generateOutsideSets(indices, points, facets, dim) {
         for (var _i = 0, facets_1 = facets; _i < facets_1.length; _i++) {
             var f = facets_1[_i];
             var dist = signedDistToPlane(p, f.plane, dim);
-            if (dist > eps) {
+            if (dist > EPSILON) {
                 var meta = f.meta;
                 meta.outsideSet.push(index);
                 meta.outsideDist.push(dist);
@@ -538,7 +580,7 @@ function getVisibleSet(p, facet, visible, horizon, dim) {
         // already checked
         if (neighbor.meta.currentPoint === p)
             continue;
-        if (signedDistToPlane(p, neighbor.plane, dim) > eps)
+        if (signedDistToPlane(p, neighbor.plane, dim) > EPSILON)
             getVisibleSet(p, neighbor, visible, horizon, dim);
         else
             horizon.push(r);
@@ -754,4 +796,88 @@ function delaunay(points) {
     });
 }
 
-export { Facet, Ridge, createSimplex, delaunay, quickHull };
+/**
+ * Provides an initial estimate to start searching, based on the facets axis-oriented bounds.
+ *
+ * @ignore
+ */
+function findStartFacet(position, points, facets) {
+    var numFacets = facets.length;
+    for (var i = 0; i < numFacets; ++i) {
+        var f = facets[i];
+        var verts = f.verts;
+        var numVerts = verts.length;
+        var dim_1 = points[0].length;
+        var found = true;
+        for (var d = 0; d < dim_1; ++d) {
+            var min = points[verts[0]][d];
+            var max = min;
+            // find min coordinate
+            for (var v = 1; v < numVerts; ++v) {
+                var p_1 = points[verts[v]][d];
+                if (p_1 < min)
+                    min = p_1;
+                else if (p_1 > max)
+                    max = p_1;
+            }
+            var p = position[d];
+            if (p < min || p >= max) {
+                found = false;
+                break;
+            }
+        }
+        if (found)
+            return f;
+    }
+    return null;
+}
+/**
+ * Walks recursively through the neihbors of a set until the containing facet is found.
+ *
+ * @ignore
+ */
+function walk(position, facet, points, centroid, dir, dim) {
+    createCentroid(points, facet.verts, centroid);
+    // so now we need to test the ray centroid -> position against the ridges and see if any intersect
+    for (var i = 0; i < dim; ++i) {
+        dir[i] = position[i] - centroid[i];
+    }
+    // using the centroid makes things easier, as the ray starting from the centroid hits the triangle face for
+    // which the intersection distance is closest, so test for minT rather than doing barycentric tests.
+    var hit = null;
+    var minT = 1.0;
+    for (var _i = 0, _a = facet.ridges; _i < _a.length; _i++) {
+        var r = _a[_i];
+        var t = intersectRayPlane(centroid, dir, r.getPlane(points), dim, true);
+        // intersection did not occur on the segment, or it's not the furthest
+        if (t > -EPSILON && t <= minT) {
+            minT = t;
+            hit = r;
+        }
+    }
+    // if no intersection is found, we must be in the facet
+    if (hit) {
+        // there is an intersection, but we may have left the shape if there's no neighbour
+        return hit.neighbor ?
+            walk(position, hit.neighbor.facet, points, centroid, dir, dim) :
+            null;
+    }
+    return facet;
+}
+function visibilityWalk(position, facets, points, startFacetOrEstimate) {
+    var startFacet;
+    if (startFacetOrEstimate === true) {
+        startFacet = findStartFacet(position, points, facets);
+        if (!startFacet)
+            return null;
+    }
+    else
+        startFacet = startFacetOrEstimate || facets[0];
+    // this is just a single reusable object in order not to have to recreate it
+    var d = dim(points[0]);
+    var centroid = new Float32Array(d);
+    var dir = new Float32Array(d);
+    return walk(position, startFacet, points, centroid, dir, d);
+}
+
+export { Facet, Ridge, createSimplex, delaunay, quickHull, visibilityWalk };

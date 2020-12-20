@@ -87,6 +87,7 @@
 								<li class="tsd-kind-function"><a href="globals.html#createsimplex" class="tsd-kind-icon">create<wbr>Simplex</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#delaunay" class="tsd-kind-icon">delaunay</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#quickhull" class="tsd-kind-icon">quick<wbr>Hull</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#visibilitywalk" class="tsd-kind-icon">visibility<wbr>Walk</a></li>
 							</ul>
 						</section>
 					</div>
@@ -100,7 +101,7 @@
 					<div class="tsd-signature tsd-kind-icon">Vector<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Float32Array</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/e1044d7/src/types.ts#L4">types.ts:4</a></li>
+							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/fd74cd5/src/types.ts#L4">types.ts:4</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -122,7 +123,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/e1044d7/src/geom/Simplex.ts#L14">geom/Simplex.ts:14</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/fd74cd5/src/geom/Simplex.ts#L14">geom/Simplex.ts:14</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -165,7 +166,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/e1044d7/src/tri/Delaunay.ts#L61">tri/Delaunay.ts:61</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/fd74cd5/src/tri/Delaunay.ts#L61">tri/Delaunay.ts:61</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -200,7 +201,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/e1044d7/src/hull/QuickHull.ts#L212">hull/QuickHull.ts:212</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/fd74cd5/src/hull/QuickHull.ts#L207">hull/QuickHull.ts:207</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -223,6 +224,99 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="visibilitywalk" class="tsd-anchor"></a>
+					<h3>visibility<wbr>Walk</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">visibility<wbr>Walk<span class="tsd-signature-symbol">(</span>position<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a>, facets<span class="tsd-signature-symbol">: </span><a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span>, points<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span>, startFacet<span class="tsd-signature-symbol">?: </span><a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="classes/facet.html" class="tsd-signature-type">Facet</a></li>
+						<li class="tsd-signature tsd-kind-icon">visibility<wbr>Walk<span class="tsd-signature-symbol">(</span>position<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a>, facets<span class="tsd-signature-symbol">: </span><a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span>, points<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span>, estimate<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="classes/facet.html" class="tsd-signature-type">Facet</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/fd74cd5/src/query/VisibilityWalk.ts#L97">query/VisibilityWalk.ts:97</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Performs the visibility walk algorithm to find the Facet containing the given position. This should only be used
+									on Delaunay triangulations, as other triangulations are not guaranteed to resolve to a solution.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>position: <a href="globals.html#vector" class="tsd-signature-type">Vector</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The position to search for.</p>
+									</div>
+								</li>
+								<li>
+									<h5>facets: <a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The facets to search</p>
+									</div>
+								</li>
+								<li>
+									<h5>points: <a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The points indexed by the facets.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> startFacet: <a href="classes/facet.html" class="tsd-signature-type">Facet</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>An optional facet to start the search. If none is provided, an initial search
+										estimate is made, but this is not guaranteed to be a performance improvement.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="classes/facet.html" class="tsd-signature-type">Facet</a></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/fd74cd5/src/query/VisibilityWalk.ts#L108">query/VisibilityWalk.ts:108</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Performs the visibility walk algorithm to find the Facet containing the given position. This should only be used
+									on Delaunay triangulations, as other triangulations are not guaranteed to resolve to a solution.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>position: <a href="globals.html#vector" class="tsd-signature-type">Vector</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The position to search for.</p>
+									</div>
+								</li>
+								<li>
+									<h5>facets: <a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The facets to search</p>
+									</div>
+								</li>
+								<li>
+									<h5>points: <a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The points indexed by the facets.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> estimate: <span class="tsd-signature-type">boolean</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>If true, searches the facets to find an initial match.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="classes/facet.html" class="tsd-signature-type">Facet</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -259,6 +353,9 @@
 					<li class=" tsd-kind-function">
 						<a href="globals.html#quickhull" class="tsd-kind-icon">quick<wbr>Hull</a>
 					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#visibilitywalk" class="tsd-kind-icon">visibility<wbr>Walk</a>
+					</li>
 				</ul>
 			</nav>
 		</div>
@@ -271,6 +368,10 @@
 			<ul class="tsd-legend">
 				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
 				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
 			</ul>
 		</div>
 	</div>
