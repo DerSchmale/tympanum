@@ -62,6 +62,8 @@ export function generateFacetPlane(facet: Facet, points: Vector[], dim: number, 
     if (centroid && signedDistToPlane(centroid, plane, dim) > 0.0) {
         negate(plane);
 
+        facet.verts.reverse();
+
         // flip ridges for consistency
         facet.ridges.reverse();
 
