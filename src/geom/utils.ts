@@ -3,7 +3,7 @@ import { Vector } from "../types";
 import { hyperplaneFromPoints, negate, signedDistToPlane } from "../math/VecMath";
 
 /**
- * Some shape construction code used internally.
+ * Some shape construction and query code used internally.
  *
  * @author derschmale <http://www.derschmale.com>
  */
@@ -19,6 +19,9 @@ import { hyperplaneFromPoints, negate, signedDistToPlane } from "../math/VecMath
  */
 export function findNeighbor(facet: Facet, ridge: Ridge, facets: Facet[]): void
 {
+    // this simply checks if all vertices are shared for all provided facets. Not very efficient, there's probably
+    // better ways to do a neighbour search. However, this is generally only applied to relatively small sets (newly
+    // constructed faces).
     const src = ridge.verts;
     const numVerts = src.length;
 
@@ -29,9 +32,8 @@ export function findNeighbor(facet: Facet, ridge: Ridge, facets: Facet[]): void
 
             let found = true;
 
-            for (let i = 0; i < numVerts; ++i) {
+            for (let i = 0; i < numVerts; ++i)
                 found = found && r.verts.indexOf(src[i]) >= 0;
-            }
 
             // all vertices are shared
             if (found) {
@@ -81,16 +83,76 @@ export function generateFacetPlane(facet: Facet, points: Vector[], dim: number, 
  */
 export function buildRidges(facet: Facet, facets: Facet[], dim: number)
 {
-    for (let r = facet.ridges.length; r < dim; ++r) {
+    const verts = facet.verts;
+    const ridges = facet.ridges;
+
+    for (let r = ridges.length; r < dim; ++r) {
         let ridge = new Ridge(facet);
 
         for (let v = 0; v < dim - 1; ++v) {
-            ridge.verts[v] = facet.verts[(r + v) % dim];
+            ridge.verts[v] = verts[(r + v) % dim];
         }
 
-        // find neighbours from already generated sets
-        // there's probably an analytical way to do this
+        ridge.opposite = verts[(r + dim) % dim];
         findNeighbor(facet, ridge, facets);
         facet.ridges.push(ridge);
     }
+}
+
+/**
+ * Combines a ridge and a point into a new facet.
+ * @param ridge The ridge to extend.
+ * @param p The index of the new point to build the missing ridges from.
+ * @param points The array containing the point values.
+ * @param facets The other facets in the shape, used to find neighbours. Usually, when constructing closed shapes,
+ * these are only the newly constructed faces.
+ * @param insidePoint A point guaranteed to be on the negative side of the facet plane.
+ * @param dim The dimension of the facet.
+ *
+ * @ignore
+ */
+export function extendRidge(ridge: Ridge, p: number, points: Vector[], facets: Facet[], insidePoint: Vector, dim: number): Facet
+{
+    // in 2D, we simply need to create 1 new facet (line) from old ridge to p
+    const facet = new Facet();
+
+    // collect all verts for this facet, which is the horizon ridge + this point
+    facet.verts = ridge.verts.concat([p]);
+
+    // the horizon ridge is part of the new facet, and gets to keep its neighbor
+    facet.ridges.push(ridge);
+    ridge.facet = facet;
+
+    // the new opposite point
+    ridge.opposite = p;
+
+    buildRidges(facet, facets, dim);
+    generateFacetPlane(facet, points, dim, insidePoint);
+    return facet;
+}
+
+/**
+ * Calculates the centroid ("average") for a collection of points.
+ *
+ * @param points The array containing all point coordinates.
+ * @param indices The indices of the points for which to calculate the averages. If not provided, the first N+1
+ * (simplex) points are used from the points array.
+ * @ignore
+ */
+export function createCentroid(points: Vector[], indices?: number[]): Vector
+{
+    // a point that will be internal from the very first simplex. Used to correctly orient new planes
+    const centroid = points[0].slice();
+    const dim = centroid.length;
+    const numPoints = indices? indices.length : dim + 1;
+
+    for (let j = 0; j < dim; ++j) {
+        for (let i = 1; i < numPoints; ++i) {
+            let index = indices[i];
+            centroid[j] += points[index][j];
+        }
+        centroid[j] /= numPoints;
+    }
+
+    return centroid;
 }

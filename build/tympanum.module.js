@@ -25,6 +25,11 @@ var Ridge = /** @class */ (function () {
 /**
  * In N dimensions, a facet forms an N-1 "polygon" which can be combined into an N-dimensional shape such as a
  * simplex, a convex hull, a triangulation, ...
+ * A facet consists out of ridges and vertices. Care has to be taken during construction that the vertices and
+ * ridges are in consistent order. The ridge's vertices must be a looping slice of (size-1) of the facet's vertices
+ * starting at its corresponding index, ie:
+ * - Every ridge at index I must start with the corresponding vertex at index I.
+ * - If this ridge at index I stores a vertex at index N, the facet's vertex index must be (N + I) % numVerts.
  */
 var Facet = /** @class */ (function () {
     function Facet() {
@@ -237,7 +242,7 @@ function signedDistToPlane(point, plane, dim) {
 }
 
 /**
- * Some shape construction code used internally.
+ * Some shape construction and query code used internally.
  *
  * @author derschmale <http://www.derschmale.com>
  */
@@ -251,6 +256,9 @@ function signedDistToPlane(point, plane, dim) {
  * @ignore
  */
 function findNeighbor(facet, ridge, facets) {
+    // this simply checks if all vertices are shared for all provided facets. Not very efficient, there's probably
+    // better ways to do a neighbour search. However, this is generally only applied to relatively small sets (newly
+    // constructed faces).
     var src = ridge.verts;
     var numVerts = src.length;
     for (var _i = 0, facets_1 = facets; _i < facets_1.length; _i++) {
@@ -261,9 +269,8 @@ function findNeighbor(facet, ridge, facets) {
             if (r.neighbor)
                 continue;
             var found = true;
-            for (var i = 0; i < numVerts; ++i) {
+            for (var i = 0; i < numVerts; ++i)
                 found = found && r.verts.indexOf(src[i]) >= 0;
-            }
             // all vertices are shared
             if (found) {
                 ridge.neighbor = r;
@@ -287,6 +294,7 @@ function generateFacetPlane(facet, points, dim, centroid) {
     var plane = facet.plane = hyperplaneFromPoints(verts);
     if (centroid && signedDistToPlane(centroid, plane, dim) > 0.0) {
         negate(plane);
+        facet.verts.reverse();
         // flip ridges for consistency
         facet.ridges.reverse();
         for (var _i = 0, _a = facet.ridges; _i < _a.length; _i++) {
@@ -303,35 +311,80 @@ function generateFacetPlane(facet, points, dim, centroid) {
  * @ignore
  */
 function buildRidges(facet, facets, dim) {
-    for (var r = facet.ridges.length; r < dim; ++r) {
+    var verts = facet.verts;
+    var ridges = facet.ridges;
+    for (var r = ridges.length; r < dim; ++r) {
         var ridge = new Ridge(facet);
         for (var v = 0; v < dim - 1; ++v) {
-            ridge.verts[v] = facet.verts[(r + v) % dim];
+            ridge.verts[v] = verts[(r + v) % dim];
         }
-        // find neighbours from already generated sets
-        // there's probably an analytical way to do this
+        ridge.opposite = verts[(r + dim) % dim];
         findNeighbor(facet, ridge, facets);
         facet.ridges.push(ridge);
     }
 }
+/**
+ * Combines a ridge and a point into a new facet.
+ * @param ridge The ridge to extend.
+ * @param p The index of the new point to build the missing ridges from.
+ * @param points The array containing the point values.
+ * @param facets The other facets in the shape, used to find neighbours. Usually, when constructing closed shapes,
+ * these are only the newly constructed faces.
+ * @param insidePoint A point guaranteed to be on the negative side of the facet plane.
+ * @param dim The dimension of the facet.
+ *
+ * @ignore
+ */
+function extendRidge(ridge, p, points, facets, insidePoint, dim) {
+    // in 2D, we simply need to create 1 new facet (line) from old ridge to p
+    var facet = new Facet();
+    // collect all verts for this facet, which is the horizon ridge + this point
+    facet.verts = ridge.verts.concat([p]);
+    // the horizon ridge is part of the new facet, and gets to keep its neighbor
+    facet.ridges.push(ridge);
+    ridge.facet = facet;
+    // the new opposite point
+    ridge.opposite = p;
+    buildRidges(facet, facets, dim);
+    generateFacetPlane(facet, points, dim, insidePoint);
+    return facet;
+}
+/**
+ * Calculates the centroid ("average") for a collection of points.
+ *
+ * @param points The array containing all point coordinates.
+ * @param indices The indices of the points for which to calculate the averages. If not provided, the first N+1
+ * (simplex) points are used from the points array.
+ * @ignore
+ */
+function createCentroid(points, indices) {
+    // a point that will be internal from the very first simplex. Used to correctly orient new planes
+    var centroid = points[0].slice();
+    var dim = centroid.length;
+    var numPoints = indices ? indices.length : dim + 1;
+    for (var j = 0; j < dim; ++j) {
+        for (var i = 1; i < numPoints; ++i) {
+            var index = indices[i];
+            centroid[j] += points[index][j];
+        }
+        centroid[j] /= numPoints;
+    }
+    return centroid;
+}
 
 /**
- * Creates an N-simplex from N+1 points.
+ * Creates an N-simplex from N+1 points. The dimension of the points are used to
+ * define the dimension of the simplex.
  *
  * @param points An array of points. Only the first N+1 points are used.
- * @param dim The dimension of the simplex.
- * @param indices An optional array of indices into points to remap which points are used
+ * @param indices An optional array of indices into points to define which points in the set are used.
  *
  * @author derschmale <http://www.derschmale.com>
  */
-function createSimplex(points, dim, indices) {
-    // TODO: We can find a better initial data set, similar to QHull:
-    //  find the minX, maxX points, and iteratively extend with furthest point
-    //  (starts with signed dist to line, then to plane in 3D, then to hyperplane in 4D)
-    //  This is the same sort of logic of the base Quickhull algorithm, so maybe it's not that much of an
-    //  improvement to do it in the first step?
-    var facets = [];
+function createSimplex(points, indices) {
+    var dim = points[0].length;
     var numVerts = dim + 1;
+    var facets = [];
     for (var i = 0; i <= dim; ++i) {
         var f = new Facet();
         // collect all verts for this facet
@@ -475,24 +528,6 @@ function getVisibleSet(p, facet, visible, horizon, dim) {
     }
 }
 /**
- * Builds a new face from a ridge and a point.
- *
- * @ignore
- */
-function attachNewFacet(ridge, p, points, facets, centroid, dim) {
-    // in 2D, we simply need to create 1 new facet (line) from old ridge to p
-    var newFacet = new Facet();
-    newFacet.meta = new FacetInfo();
-    // collect all verts for this facet, which is the horizon ridge + this point
-    newFacet.verts = ridge.verts.concat([p]);
-    // the horizon ridge is part of the new facet, and gets to keep its neighbor
-    newFacet.ridges.push(ridge);
-    ridge.facet = newFacet;
-    buildRidges(newFacet, facets, dim);
-    generateFacetPlane(newFacet, points, dim, centroid);
-    return newFacet;
-}
-/**
  * Builds a set of new facets for a point and its horizon ridges.
  *
  * @ignore
@@ -502,27 +537,11 @@ function connectHorizonRidges(points, index, H, centroid, dim) {
     // link horizon ridges with new point
     for (var _i = 0, H_1 = H; _i < H_1.length; _i++) {
         var ridge = H_1[_i];
-        var newFacet = attachNewFacet(ridge, index, points, newFacets, centroid, dim);
+        var newFacet = extendRidge(ridge, index, points, newFacets, centroid, dim);
+        newFacet.meta = new FacetInfo();
         newFacets.push(newFacet);
     }
     return newFacets;
-}
-/**
- * Creates the centroid for a collection of d points.
- *
- * @ignore
- */
-function createCentroid(points, d, indices) {
-    // a point that will be internal from the very first simplex. Used to correctly orient new planes
-    var centroid = points[0].slice();
-    for (var j = 0; j < d; ++j) {
-        for (var i = 1; i <= d; ++i) {
-            var index = indices[i];
-            centroid[j] += points[index][j];
-        }
-        centroid[j] /= d + 1;
-    }
-    return centroid;
 }
 /**
  * Returns the index with the "largest" point. The largest point is the one with the highest x coefficient, or y, z,
@@ -611,8 +630,8 @@ function quickHull(points) {
     for (var i = 0; i < numPoints; ++i)
         indices.push(i);
     var simplexIndices = getOptimalStart(points, d);
-    var centroid = createCentroid(points, d, simplexIndices);
-    var facets = createSimplex(points, d, simplexIndices);
+    var centroid = createCentroid(points, simplexIndices);
+    var facets = createSimplex(points, simplexIndices);
     for (var _i = 0, facets_2 = facets; _i < facets_2.length; _i++) {
         var f = facets_2[_i];
         f.meta = new FacetInfo();

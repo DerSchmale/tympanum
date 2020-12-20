@@ -3,25 +3,19 @@ import { Facet } from "./Geometry";
 import { buildRidges, generateFacetPlane } from "./utils";
 
 /**
- * Creates an N-simplex from N+1 points.
+ * Creates an N-simplex from N+1 points. The dimension of the points are used to
+ * define the dimension of the simplex.
  *
  * @param points An array of points. Only the first N+1 points are used.
- * @param dim The dimension of the simplex.
- * @param indices An optional array of indices into points to remap which points are used
+ * @param indices An optional array of indices into points to define which points in the set are used.
  *
  * @author derschmale <http://www.derschmale.com>
  */
-export function createSimplex(points: Vector[], dim: number, indices?: number[]): Facet[]
+export function createSimplex(points: Vector[], indices?: number[]): Facet[]
 {
-    // TODO: We can find a better initial data set, similar to QHull:
-    //  find the minX, maxX points, and iteratively extend with furthest point
-    //  (starts with signed dist to line, then to plane in 3D, then to hyperplane in 4D)
-    //  This is the same sort of logic of the base Quickhull algorithm, so maybe it's not that much of an
-    //  improvement to do it in the first step?
-
-
-    const facets: Facet[] = [];
+    const dim = points[0].length;
     const numVerts = dim + 1;
+    const facets: Facet[] = [];
 
     for (let i = 0; i <= dim; ++i) {
         const f = new Facet();

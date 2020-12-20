@@ -27,6 +27,11 @@ export class Ridge
     neighbor: Ridge;
 
     /**
+     * The index of the opposite vertex. This is required by some query code.
+     */
+    opposite: number;
+
+    /**
      * The facet to which this ridge belongs.
      */
     facet: Facet;

@@ -2,7 +2,7 @@ import { Vector } from "../types";
 import { dim, hyperplaneFromPoints, signedDistToPlane } from "../math/VecMath";
 import { Facet, Ridge } from "../geom/Geometry";
 import { createSimplex } from "../geom/Simplex";
-import { buildRidges, generateFacetPlane } from "../geom/utils";
+import { createCentroid, extendRidge } from "../geom/utils";
 import { removeElementOutOfOrder, removeIndexOutOfOrder, shuffle } from "@derschmale/array-utils";
 
 /**
@@ -98,30 +98,6 @@ function getVisibleSet(p: Vector, facet: Facet, visible: Facet[], horizon: Ridge
     }
 }
 
-/**
- * Builds a new face from a ridge and a point.
- *
- * @ignore
- */
-function attachNewFacet(ridge: Ridge, p: number, points: Vector[], facets: Facet[], centroid: Vector, dim: number): Facet
-{
-    // in 2D, we simply need to create 1 new facet (line) from old ridge to p
-    const newFacet = new Facet();
-    newFacet.meta = new FacetInfo();
-
-    // collect all verts for this facet, which is the horizon ridge + this point
-    newFacet.verts = ridge.verts.concat([p]);
-
-    // the horizon ridge is part of the new facet, and gets to keep its neighbor
-    newFacet.ridges.push(ridge);
-    ridge.facet = newFacet;
-
-    buildRidges(newFacet, facets, dim);
-
-    generateFacetPlane(newFacet, points, dim, centroid);
-
-    return newFacet;
-}
 
 /**
  * Builds a set of new facets for a point and its horizon ridges.
@@ -134,32 +110,12 @@ function connectHorizonRidges(points: Vector[], index: number, H: Ridge[], centr
 
     // link horizon ridges with new point
     for (let ridge of H) {
-        const newFacet = attachNewFacet(ridge, index, points, newFacets, centroid, dim);
+        const newFacet = extendRidge(ridge, index, points, newFacets, centroid, dim);
+        newFacet.meta = new FacetInfo();
         newFacets.push(newFacet);
     }
 
     return newFacets;
-}
-
-/**
- * Creates the centroid for a collection of d points.
- *
- * @ignore
- */
-function createCentroid(points: Vector[], d: number, indices: number[]): Vector
-{
-    // a point that will be internal from the very first simplex. Used to correctly orient new planes
-    const centroid = points[0].slice();
-
-    for (let j = 0; j < d; ++j) {
-        for (let i = 1; i <= d; ++i) {
-            let index = indices[i];
-            centroid[j] += points[index][j];
-        }
-        centroid[j] /= d + 1;
-    }
-
-    return centroid;
 }
 
 /**
@@ -264,9 +220,8 @@ export function quickHull(points: Vector[]): Facet[]
         indices.push(i);
 
     const simplexIndices = getOptimalStart(points, d);
-
-    const centroid = createCentroid(points, d, simplexIndices);
-    const facets = createSimplex(points, d, simplexIndices);
+    const centroid = createCentroid(points, simplexIndices);
+    const facets = createSimplex(points, simplexIndices);
 
     for (let f of facets)
         f.meta = new FacetInfo();

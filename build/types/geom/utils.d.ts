@@ -1,7 +1,7 @@
 import { Facet, Ridge } from "./Geometry";
 import { Vector } from "../types";
 /**
- * Some shape construction code used internally.
+ * Some shape construction and query code used internally.
  *
  * @author derschmale <http://www.derschmale.com>
  */
@@ -33,3 +33,25 @@ export declare function generateFacetPlane(facet: Facet, points: Vector[], dim: 
  * @ignore
  */
 export declare function buildRidges(facet: Facet, facets: Facet[], dim: number): void;
+/**
+ * Combines a ridge and a point into a new facet.
+ * @param ridge The ridge to extend.
+ * @param p The index of the new point to build the missing ridges from.
+ * @param points The array containing the point values.
+ * @param facets The other facets in the shape, used to find neighbours. Usually, when constructing closed shapes,
+ * these are only the newly constructed faces.
+ * @param insidePoint A point guaranteed to be on the negative side of the facet plane.
+ * @param dim The dimension of the facet.
+ *
+ * @ignore
+ */
+export declare function extendRidge(ridge: Ridge, p: number, points: Vector[], facets: Facet[], insidePoint: Vector, dim: number): Facet;
+/**
+ * Calculates the centroid ("average") for a collection of points.
+ *
+ * @param points The array containing all point coordinates.
+ * @param indices The indices of the points for which to calculate the averages. If not provided, the first N+1
+ * (simplex) points are used from the points array.
+ * @ignore
+ */
+export declare function createCentroid(points: Vector[], indices?: number[]): Vector;

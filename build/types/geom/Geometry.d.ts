@@ -21,6 +21,10 @@ export declare class Ridge {
      */
     neighbor: Ridge;
     /**
+     * The index of the opposite vertex. This is required by some query code.
+     */
+    opposite: number;
+    /**
      * The facet to which this ridge belongs.
      */
     facet: Facet;
@@ -32,6 +36,11 @@ export declare class Ridge {
 /**
  * In N dimensions, a facet forms an N-1 "polygon" which can be combined into an N-dimensional shape such as a
  * simplex, a convex hull, a triangulation, ...
+ * A facet consists out of ridges and vertices. Care has to be taken during construction that the vertices and
+ * ridges are in consistent order. The ridge's vertices must be a looping slice of (size-1) of the facet's vertices
+ * starting at its corresponding index, ie:
+ * - Every ridge at index I must start with the corresponding vertex at index I.
+ * - If this ridge at index I stores a vertex at index N, the facet's vertex index must be (N + I) % numVerts.
  */
 export declare class Facet {
     /**
