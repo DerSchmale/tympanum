@@ -57,7 +57,7 @@ import {quickHull} from "../../build/tympanum.module.js";
     {
         drawing.clear();
         drawing.drawFacets(hull, points);
-        drawing.drawFacetNormals(hull, points);
+        drawing.drawFacetNormals(hull, points, 0.02);
         drawing.drawPoints(points);
     }
 
