@@ -827,9 +827,9 @@ function findStartFacet(position, points, facets) {
             }
         }
         if (found)
-            return i;
+            return f;
     }
-    return -1;
+    return null;
 }
 /**
  * Walks recursively through the neihbors of a set until the containing facet is found.
@@ -864,27 +864,20 @@ function walk(position, facet, points, centroid, dir, dim) {
     }
     return facet;
 }
-/**
- * Performs the visibility walk algorithm to find the Facet containing the given position. This should only be used
- * on Delaunay triangulations, as other triangulations are not guaranteed to resolve to a solution.
- * @param position The position to search for.
- * @param facets The facets to search
- * @param points The points indexed by the facets.
- * @param startIndex An optional index into the facets to start the search. If -1 is provided, an initial search
- * estimate may be made, but this is not guaranteed to be a performance improvement.
- */
-function visibilityWalk(position, facets, points, startIndex) {
-    if (startIndex === void 0) { startIndex = 0; }
-    if (startIndex === -1) {
-        startIndex = findStartFacet(position, points, facets);
-        if (startIndex === -1)
+function visibilityWalk(position, facets, points, startFacetOrEstimate) {
+    var startFacet;
+    if (startFacetOrEstimate === true) {
+        startFacet = findStartFacet(position, points, facets);
+        if (!startFacet)
             return null;
     }
+    else
+        startFacet = startFacetOrEstimate || facets[0];
     // this is just a single reusable object in order not to have to recreate it
     var d = dim(points[0]);
     var centroid = new Float32Array(d);
     var dir = new Float32Array(d);
-    return walk(position, facets[startIndex], points, centroid, dir, d);
+    return walk(position, startFacet, points, centroid, dir, d);
 }
 
 export { Facet, Ridge, createSimplex, delaunay, quickHull, visibilityWalk };

@@ -9,7 +9,7 @@ import { EPSILON } from "../constants";
  *
  * @ignore
  */
-function findStartFacet(position: Vector, points: Vector[], facets: Facet[]): number
+function findStartFacet(position: Vector, points: Vector[], facets: Facet[]): Facet
 {
     const numFacets = facets.length;
     for (let i = 0; i < numFacets; ++i) {
@@ -38,10 +38,10 @@ function findStartFacet(position: Vector, points: Vector[], facets: Facet[]): nu
             }
         }
 
-        if (found) return i;
+        if (found) return f;
     }
 
-    return -1;
+    return null;
 }
 
 /**
@@ -91,21 +91,36 @@ function walk(position: Vector, facet: Facet, points: Vector[], centroid: Vector
  * @param position The position to search for.
  * @param facets The facets to search
  * @param points The points indexed by the facets.
- * @param startIndex An optional index into the facets to start the search. If -1 is provided, an initial search
- * estimate may be made, but this is not guaranteed to be a performance improvement.
+ * @param startFacet An optional facet to start the search. If none is provided, an initial search
+ * estimate is made, but this is not guaranteed to be a performance improvement.
  */
-export function visibilityWalk(position: Vector, facets: Facet[], points: Vector[], startIndex: number = 0): Facet
-{
-    if (startIndex === -1) {
-        startIndex = findStartFacet(position, points, facets);
+export function visibilityWalk(position: Vector, facets: Facet[], points: Vector[], startFacet?: Facet): Facet;
 
-        if (startIndex === -1)
+
+/**
+ * Performs the visibility walk algorithm to find the Facet containing the given position. This should only be used
+ * on Delaunay triangulations, as other triangulations are not guaranteed to resolve to a solution.
+ * @param position The position to search for.
+ * @param facets The facets to search
+ * @param points The points indexed by the facets.
+ * @param estimate If true, searches the facets to find an initial match.
+ */
+export function visibilityWalk(position: Vector, facets: Facet[], points: Vector[], estimate?: boolean): Facet;
+
+export function visibilityWalk(position: Vector, facets: Facet[], points: Vector[], startFacetOrEstimate?: Facet | boolean): Facet
+{
+    let startFacet;
+    if (startFacetOrEstimate === true) {
+        startFacet = findStartFacet(position, points, facets);
+
+        if (!startFacet)
             return null;
     }
+    else startFacet = startFacetOrEstimate || facets[0];
 
     // this is just a single reusable object in order not to have to recreate it
     const d = dim(points[0]);
     const centroid = new Float32Array(d);
     const dir = new Float32Array(d);
-    return walk(position, facets[startIndex], points, centroid, dir, d);
+    return walk(position, startFacet, points, centroid, dir, d);
 }
