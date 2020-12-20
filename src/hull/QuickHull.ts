@@ -8,11 +8,7 @@ import {
     removeIndicesOutOfOrder,
     shuffle
 } from "@derschmale/array-utils";
-
-/**
- * @ignore
- */
-const eps = 0.0;
+import { EPSILON } from "../constants";
 
 /**
  * Some meta-data while constructing the facets
@@ -66,7 +62,7 @@ function generateOutsideSets(indices: number[], points: Vector[], facets: Facet[
         for (let f of facets) {
             let dist = signedDistToPlane(p, f.plane, dim);
 
-            if (dist > eps) {
+            if (dist > EPSILON) {
                 const meta = f.meta;
                 meta.outsideSet.push(index);
                 meta.outsideDist.push(dist);
@@ -95,7 +91,7 @@ function getVisibleSet(p: Vector, facet: Facet, visible: Facet[], horizon: Ridge
         // already checked
         if (neighbor.meta.currentPoint === p) continue;
 
-        if (signedDistToPlane(p, neighbor.plane, dim) > eps)
+        if (signedDistToPlane(p, neighbor.plane, dim) > EPSILON)
             getVisibleSet(p, neighbor, visible, horizon, dim);
         else
             horizon.push(r);

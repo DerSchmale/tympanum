@@ -1,5 +1,8 @@
 import { Vector } from "../types";
 import { Facet } from "../geom/Geometry";
+import { dim, intersectRayPlane } from "../math/VecMath";
+import { createCentroid } from "../geom/utils";
+import { EPSILON } from "../constants";
 
 /**
  * Provides an initial estimate to start searching, based on the facets axis-oriented bounds.
@@ -42,24 +45,43 @@ function findStartFacet(position: Vector, points: Vector[], facets: Facet[]): nu
 }
 
 /**
- * Walks recursively through the neihbors of a set until the containing facet is found
+ * Walks recursively through the neihbors of a set until the containing facet is found.
  *
  * @ignore
  */
-function walk(position: Vector, facet: Facet, points: Vector[]): Facet
+function walk(position: Vector, facet: Facet, points: Vector[], centroid: Vector, dir: Vector, dim: number): Facet
 {
-    let foundRidge;
+    createCentroid(points, facet.verts, centroid);
 
-    for (let r of facet.ridges) {
-
+    // so now we need to test the ray centroid -> position against the ridges and see if any intersect
+    for (let i = 0; i < dim; ++i) {
+        dir[i] = position[i] - centroid[i];
     }
 
-    if (!foundRidge)
-        return facet;
-    else if (!foundRidge.neighbor)
-        return null;
-    else
-        return walk(position, foundRidge.neighbor.facet, points);
+    // using the centroid makes things easier, as the ray starting from the centroid hits the triangle face for
+    // which the intersection distance is closest, so test for minT rather than doing barycentric tests.
+    let hit = null;
+    let minT = 1.0;
+
+    for (let r of facet.ridges) {
+        const t = intersectRayPlane(centroid, dir, r.getPlane(points), dim, true);
+
+        // intersection did not occur on the segment, or it's not the furthest
+        if (t > -EPSILON && t <= minT) {
+            minT = t;
+            hit = r;
+        }
+    }
+
+    // if no intersection is found, we must be in the facet
+    if (hit) {
+        // there is an intersection, but we may have left the shape if there's no neighbour
+        return hit.neighbor ?
+            walk(position, hit.neighbor.facet, points, centroid, dir, dim) :
+            null;
+    }
+
+    return facet;
 }
 
 
@@ -76,9 +98,14 @@ export function visibilityWalk(position: Vector, facets: Facet[], points: Vector
 {
     if (startIndex === -1) {
         startIndex = findStartFacet(position, points, facets);
+
         if (startIndex === -1)
             return null;
     }
 
-    return walk(position, facets[startIndex], points);
+    // this is just a single reusable object in order not to have to recreate it
+    const d = dim(points[0]);
+    const centroid = new Float32Array(d);
+    const dir = new Float32Array(d);
+    return walk(position, facets[startIndex], points, centroid, dir, d);
 }

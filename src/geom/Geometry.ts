@@ -1,4 +1,5 @@
 import { Vector } from "../types";
+import { dot, hyperplaneFromPoints, negate, signedDistToPlane } from "../math/VecMath";
 
 /**
  * Base geometry elements.
@@ -36,12 +37,25 @@ export class Ridge
      */
     facet: Facet;
 
+    private _plane: Vector;
+
     /**
      * Creates a new ridge belonging to a facet
      */
     constructor(facet: Facet)
     {
         this.facet = facet;
+    }
+
+    /**
+     * The plane containing the ridge. Once created it remains cached.
+     */
+    getPlane(points:Vector[]): Vector
+    {
+        if (!this._plane)
+            this._plane = hyperplaneFromPoints(this.verts.map(i => points[i]));
+
+        return this._plane;
     }
 }
 

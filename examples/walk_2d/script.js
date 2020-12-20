@@ -7,7 +7,9 @@ import {delaunay, visibilityWalk} from "../../build/tympanum.module.js";
     let drawing;
     let triangulation;
     let points;
+    // let prevIndex = -1;
     let prevIndex = 0;
+
 
     function init()
     {
@@ -43,9 +45,15 @@ import {delaunay, visibilityWalk} from "../../build/tympanum.module.js";
         drawing.drawPoints(points);
     }
 
-    function testContainment()
+    function testContainment(event)
     {
-        const facet = triangulation[0]; // = visibilityWalk(pos, triangulation, points, prevIndex);
+        const pos = drawing.screenTo2D(event.clientX, event.clientY);
+
+        let time = performance.now();
+        let facet = visibilityWalk(pos, triangulation, points, prevIndex);
+        time = performance.now() - time;
+
+        console.log("Time to find neighbour: " + time.toFixed(2) + "ms");
 
         if (facet) {
             prevIndex = triangulation.indexOf(facet);
