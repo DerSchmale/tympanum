@@ -100,7 +100,7 @@
 					<div class="tsd-signature tsd-kind-icon">Vector<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Float32Array</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/8f98f11/src/types.ts#L4">types.ts:4</a></li>
+							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/e1044d7/src/types.ts#L4">types.ts:4</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -116,18 +116,19 @@
 					<a name="createsimplex" class="tsd-anchor"></a>
 					<h3>create<wbr>Simplex</h3>
 					<ul class="tsd-signatures tsd-kind-function">
-						<li class="tsd-signature tsd-kind-icon">create<wbr>Simplex<span class="tsd-signature-symbol">(</span>points<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span>, dim<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, indices<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">create<wbr>Simplex<span class="tsd-signature-symbol">(</span>points<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span>, indices<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="classes/facet.html" class="tsd-signature-type">Facet</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/8f98f11/src/geom/Simplex.ts#L14">geom/Simplex.ts:14</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/e1044d7/src/geom/Simplex.ts#L14">geom/Simplex.ts:14</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Creates an N-simplex from N+1 points.</p>
+									<p>Creates an N-simplex from N+1 points. The dimension of the points are used to
+									define the dimension of the simplex.</p>
 								</div>
 								<dl class="tsd-comment-tags">
 									<dt>author</dt>
@@ -144,15 +145,9 @@
 									</div>
 								</li>
 								<li>
-									<h5>dim: <span class="tsd-signature-type">number</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>The dimension of the simplex.</p>
-									</div>
-								</li>
-								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> indices: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>An optional array of indices into points to remap which points are used</p>
+										<p>An optional array of indices into points to define which points in the set are used.</p>
 									</div>
 								</li>
 							</ul>
@@ -170,7 +165,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/8f98f11/src/tri/Delaunay.ts#L61">tri/Delaunay.ts:61</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/e1044d7/src/tri/Delaunay.ts#L61">tri/Delaunay.ts:61</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -205,15 +200,15 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/8f98f11/src/hull/QuickHull.ts#L265">hull/QuickHull.ts:265</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/e1044d7/src/hull/QuickHull.ts#L212">hull/QuickHull.ts:212</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>QuickHull implements the algorithm of the same name, based on the original paper by Barber, Dobkin and Huhdanpaa.
-										We&#39;re not interested in 0- or 1-dimensional cases (the latter can simply be sorted points). QuickHull returns a
-										set of indices into the original point list so we can map it to a different original ata set (fe: points may be a
-									mapping for position vectors on some scene graph object).</p>
+										We&#39;re not interested in 0- or 1-dimensional cases (the latter can simply be the extent of the point values).
+										QuickHull returns a set of indices into the original point list so we can map it to a different original ata set
+									(fe: points may be a mapping for position vectors on some scene graph object).</p>
 								</div>
 								<dl class="tsd-comment-tags">
 									<dt>author</dt>

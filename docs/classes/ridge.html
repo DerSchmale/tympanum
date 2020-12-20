@@ -98,6 +98,7 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="ridge.html#facet" class="tsd-kind-icon">facet</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="ridge.html#neighbor" class="tsd-kind-icon">neighbor</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="ridge.html#opposite" class="tsd-kind-icon">opposite</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="ridge.html#verts" class="tsd-kind-icon">verts</a></li>
 							</ul>
 						</section>
@@ -116,7 +117,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/8f98f11/src/geom/Geometry.ts#L31">geom/Geometry.ts:31</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/e1044d7/src/geom/Geometry.ts#L37">geom/Geometry.ts:37</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -143,7 +144,7 @@
 					<div class="tsd-signature tsd-kind-icon">facet<span class="tsd-signature-symbol">:</span> <a href="facet.html" class="tsd-signature-type">Facet</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/8f98f11/src/geom/Geometry.ts#L31">geom/Geometry.ts:31</a></li>
+							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/e1044d7/src/geom/Geometry.ts#L37">geom/Geometry.ts:37</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -158,7 +159,7 @@
 					<div class="tsd-signature tsd-kind-icon">neighbor<span class="tsd-signature-symbol">:</span> <a href="ridge.html" class="tsd-signature-type">Ridge</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/8f98f11/src/geom/Geometry.ts#L26">geom/Geometry.ts:26</a></li>
+							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/e1044d7/src/geom/Geometry.ts#L27">geom/Geometry.ts:27</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -169,17 +170,33 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="opposite" class="tsd-anchor"></a>
+					<h3>opposite</h3>
+					<div class="tsd-signature tsd-kind-icon">opposite<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/e1044d7/src/geom/Geometry.ts#L32">geom/Geometry.ts:32</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The index of the opposite vertex. This is required by some query code.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="verts" class="tsd-anchor"></a>
 					<h3>verts</h3>
 					<div class="tsd-signature tsd-kind-icon">verts<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/8f98f11/src/geom/Geometry.ts#L20">geom/Geometry.ts:20</a></li>
+							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/e1044d7/src/geom/Geometry.ts#L21">geom/Geometry.ts:21</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>The vertices of the ridge. These are always the points forming the ridge.</p>
+							<p>The vertices of the ridge. These are always the points forming the ridge. Represented as indices into an external
+							point array.</p>
 						</div>
 					</div>
 				</section>
@@ -214,6 +231,9 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="ridge.html#neighbor" class="tsd-kind-icon">neighbor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="ridge.html#opposite" class="tsd-kind-icon">opposite</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="ridge.html#verts" class="tsd-kind-icon">verts</a>
