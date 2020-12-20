@@ -18,7 +18,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@derschmale/array-utils": "^1.0.4"
+    "@derschmale/array-utils": "^1.0.6"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^11.0.1",

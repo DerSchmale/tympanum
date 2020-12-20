@@ -444,7 +444,7 @@ var TYMP = (function (exports) {
         var sorted = indices.slice().sort(function (a, b) { return b - a; });
         for (var _i = 0, sorted_1 = sorted; _i < sorted_1.length; _i++) {
             var i = sorted_1[_i];
-            removeIndexOutOfOrder(target, sorted[i]);
+            removeIndexOutOfOrder(target, i);
         }
         return target;
     }

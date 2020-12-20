@@ -5,7 +5,6 @@ import { createSimplex } from "../geom/Simplex";
 import { createCentroid, extendRidge } from "../geom/utils";
 import {
     removeElementOutOfOrder,
-    removeIndexOutOfOrder,
     removeIndicesOutOfOrder,
     shuffle
 } from "@derschmale/array-utils";
@@ -233,6 +232,7 @@ export function quickHull(points: Vector[]): Facet[]
         f.meta = new FacetInfo();
 
     removeIndicesOutOfOrder(indices, simplexIndices);
+
     shuffle(indices);
 
     generateOutsideSets(indices, points, facets, d);
