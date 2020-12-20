@@ -3,7 +3,12 @@ import { dim, hyperplaneFromPoints, signedDistToPlane } from "../math/VecMath";
 import { Facet, Ridge } from "../geom/Geometry";
 import { createSimplex } from "../geom/Simplex";
 import { createCentroid, extendRidge } from "../geom/utils";
-import { removeElementOutOfOrder, removeIndexOutOfOrder, shuffle } from "@derschmale/array-utils";
+import {
+    removeElementOutOfOrder,
+    removeIndexOutOfOrder,
+    removeIndicesOutOfOrder,
+    shuffle
+} from "@derschmale/array-utils";
 
 /**
  * @ignore
@@ -198,9 +203,9 @@ function getOptimalStart(points: Vector[], d: number): number[]
 
 /**
  * QuickHull implements the algorithm of the same name, based on the original paper by Barber, Dobkin and Huhdanpaa.
- * We're not interested in 0- or 1-dimensional cases (the latter can simply be sorted points). QuickHull returns a
- * set of indices into the original point list so we can map it to a different original ata set (fe: points may be a
- * mapping for position vectors on some scene graph object).
+ * We're not interested in 0- or 1-dimensional cases (the latter can simply be the extent of the point values).
+ * QuickHull returns a set of indices into the original point list so we can map it to a different original ata set
+ * (fe: points may be a mapping for position vectors on some scene graph object).
  *
  * @author derschmale <http://www.derschmale.com>
  */
@@ -208,14 +213,15 @@ export function quickHull(points: Vector[]): Facet[]
 {
     const numPoints = points.length;
     if (numPoints === 0) return;
+
     const d = dim(points[0]);
 
     if (numPoints <= d) {
-        console.log(`A convex hull in ${d} dimensions requires at least ${d + 1} points.`);
+        throw new Error(`A convex hull in ${d} dimensions requires at least ${d + 1} points.`);
     }
 
     // initial unprocessed point indices:
-    let indices = [];
+    const indices = [];
     for (let i = 0; i < numPoints; ++i)
         indices.push(i);
 
@@ -226,12 +232,7 @@ export function quickHull(points: Vector[]): Facet[]
     for (let f of facets)
         f.meta = new FacetInfo();
 
-    // sorting them in descending order makes them easy to delete optimally
-    simplexIndices.sort((a, b) => b - a);
-    for (let i = 0; i < d + 1; ++i) {
-        removeIndexOutOfOrder(indices, simplexIndices[i]);
-    }
-
+    removeIndicesOutOfOrder(indices, simplexIndices);
     shuffle(indices);
 
     generateOutsideSets(indices, points, facets, d);

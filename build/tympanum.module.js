@@ -432,6 +432,23 @@ function removeIndexOutOfOrder(target, index) {
         target[index] = last;
     return index;
 }
+/**
+ * Removes multiple indices out of order.
+ */
+function removeIndicesOutOfOrder(target, indices) {
+    // sorting them in descending order makes them easy to delete optimally. Make sure not to modify the original
+    // array, we don't know if it's still used.
+    var sorted = indices.slice().sort(function (a, b) { return b - a; });
+    for (var _i = 0, sorted_1 = sorted; _i < sorted_1.length; _i++) {
+        var i = sorted_1[_i];
+        removeIndexOutOfOrder(target, sorted[i]);
+    }
+    return target;
+}
+/**
+ * Unsafely removes an item by removing the last item and inserting it in its place. Should only be used when the
+ * order of elements is not important. It returns the index of the object that was removed.
+ */
 function removeElementOutOfOrder(target, elm) {
     var last = target.pop();
     if (last === elm) {
@@ -611,9 +628,9 @@ function getOptimalStart(points, d) {
 }
 /**
  * QuickHull implements the algorithm of the same name, based on the original paper by Barber, Dobkin and Huhdanpaa.
- * We're not interested in 0- or 1-dimensional cases (the latter can simply be sorted points). QuickHull returns a
- * set of indices into the original point list so we can map it to a different original ata set (fe: points may be a
- * mapping for position vectors on some scene graph object).
+ * We're not interested in 0- or 1-dimensional cases (the latter can simply be the extent of the point values).
+ * QuickHull returns a set of indices into the original point list so we can map it to a different original ata set
+ * (fe: points may be a mapping for position vectors on some scene graph object).
  *
  * @author derschmale <http://www.derschmale.com>
  */
@@ -623,7 +640,7 @@ function quickHull(points) {
         return;
     var d = dim(points[0]);
     if (numPoints <= d) {
-        console.log("A convex hull in " + d + " dimensions requires at least " + (d + 1) + " points.");
+        throw new Error("A convex hull in " + d + " dimensions requires at least " + (d + 1) + " points.");
     }
     // initial unprocessed point indices:
     var indices = [];
@@ -636,11 +653,7 @@ function quickHull(points) {
         var f = facets_2[_i];
         f.meta = new FacetInfo();
     }
-    // sorting them in descending order makes them easy to delete optimally
-    simplexIndices.sort(function (a, b) { return b - a; });
-    for (var i = 0; i < d + 1; ++i) {
-        removeIndexOutOfOrder(indices, simplexIndices[i]);
-    }
+    removeIndicesOutOfOrder(indices, simplexIndices);
     shuffle(indices);
     generateOutsideSets(indices, points, facets, d);
     // do not cache facets.length, as it will keep changing
