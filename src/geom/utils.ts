@@ -69,3 +69,26 @@ export function generateFacetPlane(facet: Facet, points: Vector[], dim: number, 
             r.verts.reverse();
     }
 }
+
+/**
+ * Generates the ridges for a facet based on the vertices contained in it. If ridges are already present, they're
+ * considered already built and only the missing ones will be added (used only when connecting ridges). In this
+ * case, the order of vertices MUST match that of the present ridges.
+ *
+ * @ignore
+ */
+export function buildRidges(facet: Facet, facets: Facet[], dim: number)
+{
+    for (let r = facet.ridges.length; r < dim; ++r) {
+        let ridge = new Ridge(facet);
+
+        for (let v = 0; v < dim - 1; ++v) {
+            ridge.verts[v] = facet.verts[(r + v) % dim];
+        }
+
+        // find neighbours from already generated sets
+        // there's probably an analytical way to do this
+        findNeighbor(facet, ridge, facets);
+        facet.ridges.push(ridge);
+    }
+}

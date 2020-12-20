@@ -2,7 +2,7 @@ import { Vector } from "../types";
 import { dim, hyperplaneFromPoints, signedDistToPlane } from "../math/VecMath";
 import { Facet, Ridge } from "../geom/Geometry";
 import { createSimplex } from "../geom/Simplex";
-import { findNeighbor, generateFacetPlane } from "../geom/utils";
+import { buildRidges, generateFacetPlane } from "../geom/utils";
 import { removeElementOutOfOrder, removeIndexOutOfOrder, shuffle } from "@derschmale/array-utils";
 
 /**
@@ -110,27 +110,13 @@ function attachNewFacet(ridge: Ridge, p: number, points: Vector[], facets: Facet
     newFacet.meta = new FacetInfo();
 
     // collect all verts for this facet, which is the horizon ridge + this point
-    const verts = ridge.verts.slice();
-    verts.push(p);
+    newFacet.verts = ridge.verts.concat([p]);
 
     // the horizon ridge is part of the new facet, and gets to keep its neighbor
     newFacet.ridges.push(ridge);
     ridge.facet = newFacet;
 
-    // dim + 1 ridges (3 edges to a triangle in 2D, 4 faces to a tetrahedron in 3D)
-    // start with 1, since 0 would be the same as the already existing ridge above
-    for (let r = 1; r < dim; ++r) {
-        let ridge = new Ridge(newFacet);
-
-        for (let v = 0; v < dim - 1; ++v)
-            ridge.verts[v] = verts[(r + v) % dim];
-
-        // so we only need to search for neighbours in the newly generated facets, only the horizons are attached to
-        // the old ones
-        findNeighbor(newFacet, ridge, facets);
-
-        newFacet.ridges.push(ridge);
-    }
+    buildRidges(newFacet, facets, dim);
 
     generateFacetPlane(newFacet, points, dim, centroid);
 

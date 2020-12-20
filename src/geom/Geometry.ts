@@ -15,7 +15,8 @@ import { Vector } from "../types";
 export class Ridge
 {
     /**
-     * The vertices of the ridge. These are always the points forming the ridge.
+     * The vertices of the ridge. These are always the points forming the ridge. Represented as indices into an external
+     * point array.
      */
     verts: number[] = [];
 
@@ -31,7 +32,8 @@ export class Ridge
     facet: Facet;
 
     /**
-     * Creates a new ridge belonging to a facet     */
+     * Creates a new ridge belonging to a facet
+     */
     constructor(facet: Facet)
     {
         this.facet = facet;
@@ -54,6 +56,12 @@ export class Facet
      * The (hyper)plane containing the facet, represented as an N+1-dimensional vector (normal, offset)
      */
     plane: Vector;
+
+    /**
+     * The vertices of the facet. Represented as indices into an external point array. While they're also contained
+     * in the ridges, it's useful for calculating barycentric coordinates for a facet.
+     */
+    verts: number[] = [];
 
     /**
      * Any sort of meta-data, generally used internally.

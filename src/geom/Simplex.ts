@@ -1,6 +1,6 @@
 import { Vector } from "../types";
 import { Facet, Ridge } from "./Geometry";
-import { findNeighbor, generateFacetPlane } from "./utils";
+import { buildRidges, findNeighbor, generateFacetPlane } from "./utils";
 
 /**
  * Creates an N-simplex from N+1 points.
@@ -22,7 +22,6 @@ export function createSimplex(points: Vector[], dim: number, indices?: number[])
 
     const facets: Facet[] = [];
     const numVerts = dim + 1;
-    const verts = [];
 
     for (let i = 0; i <= dim; ++i) {
         const f = new Facet();
@@ -31,21 +30,10 @@ export function createSimplex(points: Vector[], dim: number, indices?: number[])
         // the facet is made up of dim + 1 points, so cycle through these
         for (let v = 0; v < dim; ++v) {
             const index = (i + v) % numVerts;
-            verts[v] = indices? indices[index] : index;
+            f.verts[v] = indices? indices[index] : index;
         }
 
-        for (let r = 0; r < dim; ++r) {
-
-            let ridge = f.ridges[r] = new Ridge(f);
-
-            for (let v = 0; v < dim - 1; ++v) {
-                ridge.verts[v] = verts[(r + v) % dim];
-            }
-
-            // find neighbours from already generated sets
-            // there's probably an analytical way to do this
-            findNeighbor(f, ridge, facets);
-        }
+        buildRidges(f, facets, dim);
 
         // an opposing face to ensure correct direction
         const index = (i + dim) % (dim + 1);

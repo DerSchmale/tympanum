@@ -13,10 +13,12 @@ var TYMP = (function (exports) {
      */
     var Ridge = /** @class */ (function () {
         /**
-         * Creates a new ridge belonging to a facet     */
+         * Creates a new ridge belonging to a facet
+         */
         function Ridge(facet) {
             /**
-             * The vertices of the ridge. These are always the points forming the ridge.
+             * The vertices of the ridge. These are always the points forming the ridge. Represented as indices into an external
+             * point array.
              */
             this.verts = [];
             this.facet = facet;
@@ -34,6 +36,11 @@ var TYMP = (function (exports) {
              * triangles, faces for tetrahedrons).
              */
             this.ridges = [];
+            /**
+             * The vertices of the facet. Represented as indices into an external point array. While they're also contained
+             * in the ridges, it's useful for calculating barycentric coordinates for a facet.
+             */
+            this.verts = [];
         }
         return Facet;
     }());
@@ -291,6 +298,24 @@ var TYMP = (function (exports) {
             }
         }
     }
+    /**
+     * Generates the ridges for a facet based on the vertices contained in it. If ridges are already present, they're
+     * considered already built and only the missing ones will be added (used only when connecting ridges).
+     *
+     * @ignore
+     */
+    function buildRidges(facet, facets, dim) {
+        for (var r = facet.ridges.length; r < dim; ++r) {
+            var ridge = new Ridge(facet);
+            for (var v = 0; v < dim - 1; ++v) {
+                ridge.verts[v] = facet.verts[(r + v) % dim];
+            }
+            // find neighbours from already generated sets
+            // there's probably an analytical way to do this
+            findNeighbor(facet, ridge, facets);
+            facet.ridges.push(ridge);
+        }
+    }
 
     /**
      * Creates an N-simplex from N+1 points.
@@ -309,24 +334,15 @@ var TYMP = (function (exports) {
         //  improvement to do it in the first step?
         var facets = [];
         var numVerts = dim + 1;
-        var verts = [];
         for (var i = 0; i <= dim; ++i) {
             var f = new Facet();
             // collect all verts for this facet
             // the facet is made up of dim + 1 points, so cycle through these
             for (var v = 0; v < dim; ++v) {
                 var index_1 = (i + v) % numVerts;
-                verts[v] = indices ? indices[index_1] : index_1;
+                f.verts[v] = indices ? indices[index_1] : index_1;
             }
-            for (var r = 0; r < dim; ++r) {
-                var ridge = f.ridges[r] = new Ridge(f);
-                for (var v = 0; v < dim - 1; ++v) {
-                    ridge.verts[v] = verts[(r + v) % dim];
-                }
-                // find neighbours from already generated sets
-                // there's probably an analytical way to do this
-                findNeighbor(f, ridge, facets);
-            }
+            buildRidges(f, facets, dim);
             // an opposing face to ensure correct direction
             var index = (i + dim) % (dim + 1);
             var opposing = points[indices ? indices[index] : index];
@@ -381,6 +397,9 @@ var TYMP = (function (exports) {
         }
     }
 
+    /**
+     * @ignore
+     */
     var eps = 0.0001;
     /**
      * Some meta-data while constructing the facets
@@ -467,22 +486,11 @@ var TYMP = (function (exports) {
         var newFacet = new Facet();
         newFacet.meta = new FacetInfo();
         // collect all verts for this facet, which is the horizon ridge + this point
-        var verts = ridge.verts.slice();
-        verts.push(p);
+        newFacet.verts = ridge.verts.concat([p]);
         // the horizon ridge is part of the new facet, and gets to keep its neighbor
         newFacet.ridges.push(ridge);
         ridge.facet = newFacet;
-        // dim + 1 ridges (3 edges to a triangle in 2D, 4 faces to a tetrahedron in 3D)
-        // start with 1, since 0 would be the same as the already existing ridge above
-        for (var r = 1; r < dim; ++r) {
-            var ridge_1 = new Ridge(newFacet);
-            for (var v = 0; v < dim - 1; ++v)
-                ridge_1.verts[v] = verts[(r + v) % dim];
-            // so we only need to search for neighbours in the newly generated facets, only the horizons are attached to
-            // the old ones
-            findNeighbor(newFacet, ridge_1, facets);
-            newFacet.ridges.push(ridge_1);
-        }
+        buildRidges(newFacet, facets, dim);
         generateFacetPlane(newFacet, points, dim, centroid);
         return newFacet;
     }
