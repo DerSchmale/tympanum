@@ -468,7 +468,7 @@ function removeElementOutOfOrder(target, elm) {
 /**
  * @ignore
  */
-var eps = 0.0001;
+var eps = 0.0;
 /**
  * Some meta-data while constructing the facets
  */
@@ -754,4 +754,69 @@ function delaunay(points) {
     });
 }
 
-export { Facet, Ridge, createSimplex, delaunay, quickHull };
+/**
+ * Provides an initial estimate to start searching, based on the facets axis-oriented bounds.
+ *
+ * @ignore
+ */
+function findStartFacet(position, points, facets) {
+    var numFacets = facets.length;
+    for (var i = 0; i < numFacets; ++i) {
+        var f = facets[i];
+        var verts = f.verts;
+        var numVerts = verts.length;
+        var dim = points[0].length;
+        var found = true;
+        for (var d = 0; d < dim; ++d) {
+            var min = points[verts[0]][d];
+            var max = min;
+            // find min coordinate
+            for (var v = 1; v < numVerts; ++v) {
+                var p_1 = points[verts[v]][d];
+                if (p_1 < min)
+                    min = p_1;
+                else if (p_1 > max)
+                    max = p_1;
+            }
+            var p = position[d];
+            if (p < min || p >= max) {
+                found = false;
+                break;
+            }
+        }
+        if (found)
+            return i;
+    }
+    return -1;
+}
+/**
+ * Walks recursively through the neihbors of a set until the containing facet is found
+ *
+ * @ignore
+ */
+function walk(position, facet, points) {
+    for (var _i = 0, _a = facet.ridges; _i < _a.length; _i++) {
+        var r = _a[_i];
+    }
+    return facet;
+}
+/**
+ * Performs the visibility walk algorithm to find the Facet containing the given position. This should only be used
+ * on Delaunay triangulations, as other triangulations are not guaranteed to resolve to a solution.
+ * @param position The position to search for.
+ * @param facets The facets to search
+ * @param points The points indexed by the facets.
+ * @param startIndex An optional index into the facets to start the search. If -1 is provided, an initial search
+ * estimate may be made, but this is not guaranteed to be a performance improvement.
+ */
+function visibilityWalk(position, facets, points, startIndex) {
+    if (startIndex === void 0) { startIndex = 0; }
+    if (startIndex === -1) {
+        startIndex = findStartFacet(position, points, facets);
+        if (startIndex === -1)
+            return null;
+    }
+    return walk(position, facets[startIndex]);
+}
+
+export { Facet, Ridge, createSimplex, delaunay, quickHull, visibilityWalk };

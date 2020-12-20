@@ -123,19 +123,19 @@ function initCanvas(canvas, drawFunc) {
         ctx.strokeStyle = strokeStyle || "green";
         ctx.lineWidth = lineWidth || 1;
 
-        // let i = 0;
         facets.forEach(facet => {
-            // ctx.beginPath();
-            // setTimeout(() => {
-            //     ctx.beginPath();
-                drawFacet(facet, points);
-            //     ctx.stroke();
-            // }, i);
-
-            // i += 1000;
+            drawFacet(facet, points);
         });
 
         ctx.stroke();
+    }
+
+    function fillFacet(facet, points, fillStyle)
+    {
+        ctx.beginPath();
+        ctx.fillStyle = fillStyle || "white";
+        drawFacet(facet, points);
+        ctx.fill();
     }
 
     function drawFacetNormals(facets, points, length, strokeStyle, lineWidth)
@@ -156,6 +156,7 @@ function initCanvas(canvas, drawFunc) {
         drawPoints,
         drawFacets,
         drawFacetNormals,
+        fillFacet,
         get rotation() { return rotation; },
         set rotation(value) { rotation = value; },
         get zOffset() { return zOffset; },

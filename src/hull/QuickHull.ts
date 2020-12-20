@@ -5,7 +5,6 @@ import { createSimplex } from "../geom/Simplex";
 import { createCentroid, extendRidge } from "../geom/utils";
 import {
     removeElementOutOfOrder,
-    removeIndexOutOfOrder,
     removeIndicesOutOfOrder,
     shuffle
 } from "@derschmale/array-utils";
@@ -13,7 +12,7 @@ import {
 /**
  * @ignore
  */
-const eps = 0.0001;
+const eps = 0.0;
 
 /**
  * Some meta-data while constructing the facets
