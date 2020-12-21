@@ -1,6 +1,4 @@
 import { Vector } from "../types";
-import { Ridge } from "../geom/Geometry";
-import { EPSILON } from "../constants";
 
 /**
  * Some basic N-dimensional vector math.
@@ -110,14 +108,15 @@ function cofactor(mat: Vector[], tgt: Vector[], row: number, col: number, dim: n
  *
  * @ignore
  */
-function getSquareMatrix(dim: number): Vector[]
+export function getSquareMatrix(dim: number): Vector[]
 {
-    let sub = [];
+    const data = new ArrayBuffer(dim * dim * 4);
+    const mtx = [];
 
     for (let i = 0; i < dim; ++i)
-        sub[i] = new Float32Array(dim);
+        mtx[i] = new Float32Array(data, i * dim << 2, dim);
 
-    return sub;
+    return mtx;
 }
 
 /**
@@ -136,7 +135,7 @@ function det(v: Vector[], dim: number): number
     }
     else if (dim === 3) {
         return v[0][0] * v[1][1] * v[2][2] + v[0][1] * v[1][2] * v[2][0] + v[0][2] * v[1][0] * v[2][1]
-                - v[0][2] * v[1][1] * v[2][0] - v[0][1] * v[1][0] * v[2][2] - v[0][0] * v[1][2] * v[2][1];
+            - v[0][2] * v[1][1] * v[2][0] - v[0][1] * v[1][0] * v[2][2] - v[0][0] * v[1][2] * v[2][1];
     }
     else {
         let s = 1;
@@ -182,7 +181,7 @@ function generalizedCross(v: Vector[], tgt?: Vector): Vector
         // with eN being the n-th standard basis vector (1, 0, 0), (0, 1, 0)
         // IE: the eN elements are basically "selectors" for each target vector's element
 
-        let sign = dim % 2? -1 : 1;
+        let sign = dim % 2 ? -1 : 1;
         let sub = getSquareMatrix(dim - 1);
 
         for (let i = 0; i < dim; ++i) {
@@ -206,7 +205,8 @@ function generalizedCross(v: Vector[], tgt?: Vector): Vector
  *
  * @ignore
  */
-export function hyperplaneFromPoints(p: Vector[], tgt?: Vector) {
+export function hyperplaneFromPoints(p: Vector[], tgt?: Vector)
+{
     const dim = p.length;
     const v0 = p[0];
     const vecs = [];
@@ -287,4 +287,103 @@ export function intersectRayPlane(origin: Vector, dir: Vector, plane: Vector, di
     }
 
     return -1;
+}
+
+/**
+ * Calculates the adjoint of a matrix
+ *
+ * @ignore
+ */
+function adjointMatrix(mtx: Vector[], tgt: Vector[], dim: number): Vector[]
+{
+    if (dim === 1)
+        return [ [ 1 ] ];
+
+    // temp is used to store cofactors of A[][]
+    let sign = 1;
+    let cof = getSquareMatrix(dim);
+
+    for (let i = 0; i < dim; ++i) {
+        for (let j = 0; j < dim; ++j) {
+            cofactor(mtx, cof, i, j, dim);
+            sign = ((i + j) % 2 == 0) ? 1 : -1;
+            tgt[j][i] = (sign) * (det(cof, dim - 1));
+        }
+    }
+
+    return tgt;
+}
+
+/**
+ * Calculates the inverse of a matrix
+ * @ignore
+ */
+export function invertMatrix(mtx: Vector[], dim: number): Vector[]
+{
+    // custom cases for efficiency
+    if (dim === 2) {
+        const m00 = mtx[0][0], m01 = mtx[0][1];
+        const m10 = mtx[1][0], m11 = mtx[1][1];
+        const determinant = m00 * m11 - m01 * m10;
+        if (determinant === 0.0) return null;
+        const rcpDet = 1.0 / determinant;
+        mtx[0][0] = m11 * rcpDet;
+        mtx[0][1] = -m01 * rcpDet;
+        mtx[1][0] = -m10 * rcpDet;
+        mtx[1][1] = m00 * rcpDet;
+    }
+    else if (dim === 3) {
+        const m00 = mtx[0][0], m01 = mtx[0][1], m02 = mtx[0][2];
+        const m10 = mtx[1][0], m11 = mtx[1][1], m12 = mtx[1][2];
+        const m20 = mtx[2][0], m21 = mtx[2][1], m22 = mtx[2][2];
+
+        const determinant = m00 * (m11 * m22 - m12 * m21) - m01 * (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20);
+        if (determinant === 0.0) return null;
+        const rcpDet = 1.0 / determinant;
+
+        mtx[0][0] = (m11 * m22 - m12 * m21) * rcpDet;
+        mtx[0][1] = (m02 * m21 - m01 * m22) * rcpDet;
+        mtx[0][2] = (m01 * m12 - m02 * m11) * rcpDet;
+        mtx[1][0] = (m12 * m20 - m10 * m22) * rcpDet;
+        mtx[1][1] = (m00 * m22 - m02 * m20) * rcpDet;
+        mtx[1][2] = (m02 * m10 - m00 * m12) * rcpDet;
+        mtx[2][0] = (m10 * m21 - m11 * m20) * rcpDet;
+        mtx[2][1] = (m01 * m20 - m00 * m21) * rcpDet;
+        mtx[2][2] = (m00 * m11 - m01 * m10) * rcpDet;
+        return this;
+    }
+    else {
+        // There are faster ways of doing this, but for now, it'll do
+        let determinant = det(mtx, dim);
+        if (determinant === 0) {
+            return null;
+        }
+
+        const rcpDet = 1.0 / determinant;
+
+        // Find adjoint
+        let adj = adjointMatrix(mtx, getSquareMatrix(dim), dim);
+
+        // inverse(A) = adjoint/determinant
+        for (let i = 0; i < dim; ++i)
+            for (let j = 0; j < dim; j++)
+                mtx[i][j] = adj[i][j] * rcpDet;
+
+    }
+    return mtx;
+}
+
+/**
+ * @ignore
+ */
+export function transformVector(mtx: Vector[], p: Vector, tgt: Vector, dim: number)
+{
+    for (let i = 0; i < dim; ++i) {
+        tgt[i] = 0;
+        for (let j = 0; j < dim; ++j) {
+            tgt[i] += p[j] * mtx[i][j];
+        }
+    }
+
+    return tgt;
 }

@@ -68,10 +68,11 @@ function cofactor(mat, tgt, row, col, dim) {
  * @ignore
  */
 function getSquareMatrix(dim) {
-    var sub = [];
+    var data = new ArrayBuffer(dim * dim * 4);
+    var mtx = [];
     for (var i = 0; i < dim; ++i)
-        sub[i] = new Float32Array(dim);
-    return sub;
+        mtx[i] = new Float32Array(data, i * dim << 2, dim);
+    return mtx;
 }
 /**
  * Calculates the determinant for a matrix.
@@ -214,6 +215,80 @@ function intersectRayPlane(origin, dir, plane, dim, startsInside) {
         return -signedDistToPlane(origin, plane, dim) / denom;
     }
     return -1;
+}
+function adjointMatrix(mtx, tgt, dim) {
+    if (dim === 1)
+        return [[1]];
+    // temp is used to store cofactors of A[][]
+    var sign = 1;
+    var cof = getSquareMatrix(dim);
+    for (var i = 0; i < dim; ++i) {
+        for (var j = 0; j < dim; ++j) {
+            cofactor(mtx, cof, i, j, dim);
+            sign = ((i + j) % 2 == 0) ? 1 : -1;
+            tgt[j][i] = (sign) * (det(cof, dim - 1));
+        }
+    }
+    return tgt;
+}
+// this happens in place?
+function invertMatrix(mtx, dim) {
+    // custom cases for efficiency
+    if (dim === 2) {
+        var m00 = mtx[0][0], m01 = mtx[0][1];
+        var m10 = mtx[1][0], m11 = mtx[1][1];
+        var determinant = m00 * m11 - m01 * m10;
+        if (determinant === 0.0)
+            return null;
+        var rcpDet = 1.0 / determinant;
+        mtx[0][0] = m11 * rcpDet;
+        mtx[0][1] = -m01 * rcpDet;
+        mtx[1][0] = -m10 * rcpDet;
+        mtx[1][1] = m00 * rcpDet;
+    }
+    else if (dim === 3) {
+        var m00 = mtx[0][0], m01 = mtx[0][1], m02 = mtx[0][2];
+        var m10 = mtx[1][0], m11 = mtx[1][1], m12 = mtx[1][2];
+        var m20 = mtx[2][0], m21 = mtx[2][1], m22 = mtx[2][2];
+        var determinant = m00 * (m11 * m22 - m12 * m21) - m01 * (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20);
+        if (determinant === 0.0)
+            return null;
+        var rcpDet = 1.0 / determinant;
+        mtx[0][0] = (m11 * m22 - m12 * m21) * rcpDet;
+        mtx[0][1] = (m02 * m21 - m01 * m22) * rcpDet;
+        mtx[0][2] = (m01 * m12 - m02 * m11) * rcpDet;
+        mtx[1][0] = (m12 * m20 - m10 * m22) * rcpDet;
+        mtx[1][1] = (m00 * m22 - m02 * m20) * rcpDet;
+        mtx[1][2] = (m02 * m10 - m00 * m12) * rcpDet;
+        mtx[2][0] = (m10 * m21 - m11 * m20) * rcpDet;
+        mtx[2][1] = (m01 * m20 - m00 * m21) * rcpDet;
+        mtx[2][2] = (m00 * m11 - m01 * m10) * rcpDet;
+        return this;
+    }
+    else {
+        // There are faster ways of doing this, but for now, it'll do
+        var determinant = det(mtx, dim);
+        if (determinant === 0) {
+            return null;
+        }
+        var rcpDet = 1.0 / determinant;
+        // Find adjoint
+        var adj = adjointMatrix(mtx, getSquareMatrix(dim), dim);
+        // inverse(A) = adjoint/determinant
+        for (var i = 0; i < dim; ++i)
+            for (var j = 0; j < dim; j++)
+                mtx[i][j] = adj[i][j] * rcpDet;
+    }
+    return mtx;
+}
+function transformVector(mtx, p, tgt, dim) {
+    for (var i = 0; i < dim; ++i) {
+        tgt[i] = 0;
+        for (var j = 0; j < dim; ++j) {
+            tgt[i] += p[j] * mtx[i][j];
+        }
+    }
+    return tgt;
 }
 
 /**
@@ -796,6 +871,45 @@ function delaunay(points) {
     });
 }
 
+var mtxCache = [];
+var tmpCache = [];
+/**
+ * Calculates the barycentric coordinates for a given point and a Facet. Every element of the coordinate is the
+ * weight for the facet's vertex at the corresponding index.
+ * @param position The position to calculate the barycentric coords for.
+ * @param facet The Facet relative to which the coords are calculated.
+ * @param points The points array indexed by Facet.
+ * @param tgt An optional target to store the results. For dimension N, must be of length N+1.
+ */
+function barycentricCoords(position, facet, points, tgt) {
+    var d = dim(position);
+    tgt = tgt || new Float32Array(d + 1);
+    // we'll probably want to execute this function a lot of times, so let's make it efficient by not recreating these
+    var mtx = mtxCache[d];
+    if (!mtx) {
+        mtxCache[d] = mtx = getSquareMatrix(d);
+        tmpCache[d] = new Float32Array(d);
+    }
+    var tmp = tmpCache[d];
+    var verts = facet.verts;
+    var pN = points[verts[d]];
+    // express all relative to pN
+    for (var i = 0; i < d; ++i) {
+        tmp[i] = position[i] - pN[i];
+        var p = points[verts[i]];
+        for (var j = 0; j < d; ++j) {
+            // vectors are transposed!
+            mtx[j][i] = p[j] - pN[j];
+        }
+    }
+    invertMatrix(mtx, d);
+    transformVector(mtx, tmp, tgt, d);
+    tgt[d] = 1.0;
+    for (var i = 0; i < d; ++i)
+        tgt[d] -= tgt[i];
+    return tgt;
+}
+
 /**
  * Provides an initial estimate to start searching, based on the facets axis-oriented bounds.
  *
@@ -880,4 +994,4 @@ function visibilityWalk(position, facets, points, startFacetOrEstimate) {
     return walk(position, startFacet, points, centroid, dir, d);
 }
 
-export { Facet, Ridge, createSimplex, delaunay, quickHull, visibilityWalk };
+export { Facet, Ridge, barycentricCoords, createSimplex, delaunay, quickHull, visibilityWalk };

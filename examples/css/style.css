@@ -23,6 +23,7 @@ a {
     background: rgba(50, 50, 50, .5);
     text-align: left;
     line-height: 200%;
+    max-width: 20vw;
 }
 
 .vAlignContainer {

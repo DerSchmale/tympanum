@@ -28,6 +28,13 @@ export declare function normalize(v: Vector): Vector;
  */
 export declare function normalizePlane(v: Vector): Vector;
 /**
+ * Creates a new N-dimensional matrix.
+ * Indexing is [row][col].
+ *
+ * @ignore
+ */
+export declare function getSquareMatrix(dim: number): Vector[];
+/**
  * Calculates the hyperplane that contains the given points. The amount of points defines the dimension of the
  * hyperplane.
  *
@@ -62,3 +69,5 @@ export declare function signedDistToPlane(point: Vector, plane: Vector, dim?: nu
  * @ignore
  */
 export declare function intersectRayPlane(origin: Vector, dir: Vector, plane: Vector, dim: number, startsInside?: boolean): number;
+export declare function invertMatrix(mtx: Vector[], dim: number): Vector[];
+export declare function transformVector(mtx: Vector[], p: Vector, tgt: Vector, dim: number): Vector;

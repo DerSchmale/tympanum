@@ -1,14 +1,12 @@
-import {delaunay, visibilityWalk} from "../../build/tympanum.module.js";
+import {delaunay, barycentricCoords, visibilityWalk} from "../../build/tympanum.module.js";
 
 (() => {
     window.onload = init;
-    document.addEventListener("click", testContainment);
+    document.addEventListener("click", reconstruct);
 
     let drawing;
     let triangulation;
     let points;
-    let prevFacet = null;
-
 
     function init()
     {
@@ -21,7 +19,6 @@ import {delaunay, visibilityWalk} from "../../build/tympanum.module.js";
         points = [];
 
         for (let i = 0; i < 200; ++i) {
-
             points[i] = [
                 (Math.random() - 0.5) * 2.0,
                 (Math.random() - 0.5) * 2.0
@@ -44,19 +41,29 @@ import {delaunay, visibilityWalk} from "../../build/tympanum.module.js";
         drawing.drawPoints(points);
     }
 
-    function testContainment(event)
+    function reconstruct(event)
     {
         const pos = drawing.screenTo2D(event.clientX, event.clientY);
-
         let time = performance.now();
-        let facet = visibilityWalk(pos, triangulation, points, prevFacet);
+        const facet = visibilityWalk(pos, triangulation, points);
+
+        if (facet) {
+            const bary = barycentricCoords(pos, facet, points);
+            const p = [ 0, 0 ];
+
+            for (let i = 0; i < bary.length; ++i) {
+                const v = points[facet.verts[i]];
+                const b = bary[i];
+                for (let d = 0; d < 2; ++d) {
+                    p[d] += v[d] * b;
+                }
+            }
+
+            drawing.drawPoints([p], "blue");
+        }
+
         time = performance.now() - time;
 
-        console.log("Time to find facet: " + time.toFixed(2) + "ms");
-
-        prevFacet = facet;
-
-        if (facet)
-            drawing.fillFacet(facet, points);
+        console.log("Time to calculate: " + time.toFixed(2) + "ms");
     }
 })();
