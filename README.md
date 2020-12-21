@@ -1,7 +1,6 @@
 # Tympanum
 
-A Typescript library for multidimensional geometry code. There's not much in it, but may grow slightly as I need more
-functionality.
+A Typescript library for generating multidimensional convex hulls and delaunay triangulations.
 
 # Documentation
 
