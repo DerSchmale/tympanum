@@ -84,6 +84,7 @@
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-function"><a href="globals.html#barycentriccoords" class="tsd-kind-icon">barycentric<wbr>Coords</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#createsimplex" class="tsd-kind-icon">create<wbr>Simplex</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#delaunay" class="tsd-kind-icon">delaunay</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#quickhull" class="tsd-kind-icon">quick<wbr>Hull</a></li>
@@ -101,7 +102,7 @@
 					<div class="tsd-signature tsd-kind-icon">Vector<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Float32Array</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/fd74cd5/src/types.ts#L4">types.ts:4</a></li>
+							<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/1127143/src/types.ts#L4">types.ts:4</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -114,6 +115,61 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
 				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="barycentriccoords" class="tsd-anchor"></a>
+					<h3>barycentric<wbr>Coords</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">barycentric<wbr>Coords<span class="tsd-signature-symbol">(</span>position<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a>, facet<span class="tsd-signature-symbol">: </span><a href="classes/facet.html" class="tsd-signature-type">Facet</a>, points<span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span>, tgt<span class="tsd-signature-symbol">?: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="globals.html#vector" class="tsd-signature-type">Vector</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/1127143/src/query/Barycentric.ts#L25">query/Barycentric.ts:25</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Calculates the barycentric coordinates for a given point and a Facet. Every element of the coordinate is the
+									weight for the facet&#39;s vertex at the corresponding index.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>author</dt>
+									<dd><p>derschmale <a href="http://www.derschmale.com">http://www.derschmale.com</a></p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>position: <a href="globals.html#vector" class="tsd-signature-type">Vector</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The position to calculate the barycentric coords for.</p>
+									</div>
+								</li>
+								<li>
+									<h5>facet: <a href="classes/facet.html" class="tsd-signature-type">Facet</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The Facet relative to which the coords are calculated.</p>
+									</div>
+								</li>
+								<li>
+									<h5>points: <a href="globals.html#vector" class="tsd-signature-type">Vector</a><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The points array indexed by Facet.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> tgt: <a href="globals.html#vector" class="tsd-signature-type">Vector</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>An optional target to store the results. For dimension N, must be of length N+1.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="globals.html#vector" class="tsd-signature-type">Vector</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
 					<a name="createsimplex" class="tsd-anchor"></a>
 					<h3>create<wbr>Simplex</h3>
 					<ul class="tsd-signatures tsd-kind-function">
@@ -123,7 +179,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/fd74cd5/src/geom/Simplex.ts#L14">geom/Simplex.ts:14</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/1127143/src/geom/Simplex.ts#L14">geom/Simplex.ts:14</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -166,7 +222,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/fd74cd5/src/tri/Delaunay.ts#L61">tri/Delaunay.ts:61</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/1127143/src/tri/Delaunay.ts#L61">tri/Delaunay.ts:61</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -201,7 +257,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/fd74cd5/src/hull/QuickHull.ts#L207">hull/QuickHull.ts:207</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/1127143/src/hull/QuickHull.ts#L207">hull/QuickHull.ts:207</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -238,7 +294,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/fd74cd5/src/query/VisibilityWalk.ts#L97">query/VisibilityWalk.ts:97</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/1127143/src/query/VisibilityWalk.ts#L97">query/VisibilityWalk.ts:97</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -280,7 +336,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/fd74cd5/src/query/VisibilityWalk.ts#L108">query/VisibilityWalk.ts:108</a></li>
+									<li>Defined in <a href="https://github.com/DerSchmale/tympanum/blob/1127143/src/query/VisibilityWalk.ts#L108">query/VisibilityWalk.ts:108</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -343,6 +399,9 @@
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#vector" class="tsd-kind-icon">Vector</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#barycentriccoords" class="tsd-kind-icon">barycentric<wbr>Coords</a>
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="globals.html#createsimplex" class="tsd-kind-icon">create<wbr>Simplex</a>

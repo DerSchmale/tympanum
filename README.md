@@ -15,6 +15,7 @@ functionality.
 - [2D Delaunay Triangulation](https://derschmale.github.io/tympanum/examples/delaunay_2d/index.html)
 - [3D Delaunay Tetrahedralisation](https://derschmale.github.io/tympanum/examples/delaunay_3d/index.html)
 - [Delaunay facet search using visibility walking](https://derschmale.github.io/tympanum/examples/walk_2d/index.html)
+- [Point reconstruction with barycentric coordinates](https://derschmale.github.io/tympanum/examples/barycentric/index.html)
 
 ## Basic Types
 
@@ -74,5 +75,43 @@ import { visibilityWalk } from "@derschmale/tympanum";
 
 const pos = [ 0.5, 0.2, 0.7 ];
 const facet = visibilityWalk(pos, triangulation, points);
+
+```
+
+When a facet has been found, we can calculate the point's barycentric coordinates. The barycentric coordinates can be 
+used to interpolate values associated to each respective point.
+
+```
+import { barycentricCoords } from "@derschmale/tympanum";
+
+// for example: every point has an RGB color assigned to it:
+let colors = [];
+
+// any color at index N is associated with the point at points[N]
+for (let i = 0; i < 5000; ++i) {  
+    colors[i] = { 
+      r: Math.random() * 0xff, 
+      g: Math.random() * 0xff, 
+      b: Math.random() * 0xff
+    };
+}
+
+if (facet) {
+  const bary = barycentricCoords(pos, facet, points);
+  const color = { r: 0, g: 0, b: 0 };
+  
+  for (let i = 0; i < bary.length; ++i) {
+    // get the index of the point
+    let index = facet.verts[i];
+  
+    // get the color at that index
+    let c = colors[index];
+    
+    // add the weighted colors together
+    color.r += bary[i] * c.r; 
+    color.g += bary[i] * c.g; 
+    color.b += bary[i] * c.b; 
+  }
+}
 
 ```
