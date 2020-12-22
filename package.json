@@ -3,6 +3,7 @@
   "version": "1.3.0",
   "main": "build/tympanum.js",
   "module": "build/tympanum.module.js",
+  "types": "build/types/main.d.ts",
   "files": [
     "build/**/*",
     "README.md",
