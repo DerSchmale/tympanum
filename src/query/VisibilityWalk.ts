@@ -61,13 +61,13 @@ function walk(position: Vector, facet: Facet, points: Vector[], centroid: Vector
     // using the centroid makes things easier, as the ray starting from the centroid hits the triangle face for
     // which the intersection distance is closest, so test for minT rather than doing barycentric tests.
     let hit = null;
-    let minT = 1.0;
+    let minT = 1.0 - EPSILON;
 
     for (let r of facet.ridges) {
         const t = intersectRayPlane(centroid, dir, r.getPlane(points), dim, true);
 
         // intersection did not occur on the segment, or it's not the furthest
-        if (t > -EPSILON && t <= minT) {
+        if (t > EPSILON && t <= minT) {
             minT = t;
             hit = r;
         }

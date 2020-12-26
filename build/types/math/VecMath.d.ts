@@ -69,5 +69,12 @@ export declare function signedDistToPlane(point: Vector, plane: Vector, dim?: nu
  * @ignore
  */
 export declare function intersectRayPlane(origin: Vector, dir: Vector, plane: Vector, dim: number, startsInside?: boolean): number;
+/**
+ * Calculates the inverse of a matrix
+ * @ignore
+ */
 export declare function invertMatrix(mtx: Vector[], dim: number): Vector[];
+/**
+ * @ignore
+ */
 export declare function transformVector(mtx: Vector[], p: Vector, tgt: Vector, dim: number): Vector;

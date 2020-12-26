@@ -216,6 +216,11 @@ function intersectRayPlane(origin, dir, plane, dim, startsInside) {
     }
     return -1;
 }
+/**
+ * Calculates the adjoint of a matrix
+ *
+ * @ignore
+ */
 function adjointMatrix(mtx, tgt, dim) {
     if (dim === 1)
         return [[1]];
@@ -231,7 +236,10 @@ function adjointMatrix(mtx, tgt, dim) {
     }
     return tgt;
 }
-// this happens in place?
+/**
+ * Calculates the inverse of a matrix
+ * @ignore
+ */
 function invertMatrix(mtx, dim) {
     // custom cases for efficiency
     if (dim === 2) {
@@ -281,6 +289,9 @@ function invertMatrix(mtx, dim) {
     }
     return mtx;
 }
+/**
+ * @ignore
+ */
 function transformVector(mtx, p, tgt, dim) {
     for (var i = 0; i < dim; ++i) {
         tgt[i] = 0;
@@ -871,7 +882,13 @@ function delaunay(points) {
     });
 }
 
+/**
+ * @ignore
+ */
 var mtxCache = [];
+/**
+ * @ignore
+ */
 var tmpCache = [];
 /**
  * Calculates the barycentric coordinates for a given point and a Facet. Every element of the coordinate is the
@@ -880,6 +897,8 @@ var tmpCache = [];
  * @param facet The Facet relative to which the coords are calculated.
  * @param points The points array indexed by Facet.
  * @param tgt An optional target to store the results. For dimension N, must be of length N+1.
+ *
+ * @author derschmale <http://www.derschmale.com>
  */
 function barycentricCoords(position, facet, points, tgt) {
     var d = dim(position);
@@ -959,12 +978,12 @@ function walk(position, facet, points, centroid, dir, dim) {
     // using the centroid makes things easier, as the ray starting from the centroid hits the triangle face for
     // which the intersection distance is closest, so test for minT rather than doing barycentric tests.
     var hit = null;
-    var minT = 1.0;
+    var minT = 1.0 - EPSILON;
     for (var _i = 0, _a = facet.ridges; _i < _a.length; _i++) {
         var r = _a[_i];
         var t = intersectRayPlane(centroid, dir, r.getPlane(points), dim, true);
         // intersection did not occur on the segment, or it's not the furthest
-        if (t > -EPSILON && t <= minT) {
+        if (t > EPSILON && t <= minT) {
             minT = t;
             hit = r;
         }
