@@ -18,6 +18,8 @@ function lift(points: Vector[], d: number): Vector[]
     const arr = new ArrayBuffer((numPoints + 1) * byteSize); // add room for one upper bound
     let i = 0;
     let bound = 0;
+    let min = points[0].slice();
+	let max = points[0].slice();
 
     const lifted = points.map(p =>
     {
@@ -28,6 +30,13 @@ function lift(points: Vector[], d: number): Vector[]
             const e = p[j];
             // the random factor is cheating, but it seems to solve some precision errors if everything is on a grid
             f[j] = e;
+
+            if (e < min[j])
+				min[j] = e;
+
+			if (e > max[j])
+				max[j] = e;
+
             s += e * e;
         }
 
@@ -44,12 +53,12 @@ function lift(points: Vector[], d: number): Vector[]
     // add a bounding point to increase robustness, will be filtered out on plane side test
     const boundPt = new Float32Array(arr, numPoints * byteSize, liftedDim);
     for (let i = 0; i < d; ++i) {
-        boundPt[i] = 0;
+        boundPt[i] = (min[i] + max[i]) * .5;
     }
-    boundPt[d] = bound * 10.0;
+    boundPt[d] = bound;
     lifted.push(boundPt);
 
-    return lifted
+    return lifted;
 }
 
 /**
@@ -61,8 +70,9 @@ function lift(points: Vector[], d: number): Vector[]
 export function delaunay(points: Vector[]): Facet[]
 {
     const d = dim(points[0]);
+    const numPoints = points.length;
 
-    if (points.length === d + 1) {
+    if (numPoints === d + 1) {
         return quickHull(points);
     }
 

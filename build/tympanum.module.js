@@ -831,6 +831,8 @@ function lift(points, d) {
     var arr = new ArrayBuffer((numPoints + 1) * byteSize); // add room for one upper bound
     var i = 0;
     var bound = 0;
+    var min = points[0].slice();
+    var max = points[0].slice();
     var lifted = points.map(function (p) {
         var f = new Float32Array(arr, i, liftedDim);
         var s = 0;
@@ -838,6 +840,10 @@ function lift(points, d) {
             var e = p[j];
             // the random factor is cheating, but it seems to solve some precision errors if everything is on a grid
             f[j] = e;
+            if (e < min[j])
+                min[j] = e;
+            if (e > max[j])
+                max[j] = e;
             s += e * e;
         }
         f[d] = s;
@@ -849,9 +855,9 @@ function lift(points, d) {
     // add a bounding point to increase robustness, will be filtered out on plane side test
     var boundPt = new Float32Array(arr, numPoints * byteSize, liftedDim);
     for (var i_1 = 0; i_1 < d; ++i_1) {
-        boundPt[i_1] = 0;
+        boundPt[i_1] = (min[i_1] + max[i_1]) * .5;
     }
-    boundPt[d] = bound * 10.0;
+    boundPt[d] = bound;
     lifted.push(boundPt);
     return lifted;
 }
@@ -863,7 +869,8 @@ function lift(points, d) {
  */
 function delaunay(points) {
     var d = dim(points[0]);
-    if (points.length === d + 1) {
+    var numPoints = points.length;
+    if (numPoints === d + 1) {
         return quickHull(points);
     }
     var lifted = lift(points, d);
