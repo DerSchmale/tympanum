@@ -205,7 +205,7 @@ function generalizedCross(v: Vector[], tgt?: Vector): Vector
  *
  * @ignore
  */
-export function hyperplaneFromPoints(p: Vector[], centroid: Vector, tgt?: Vector)
+export function hyperplaneFromPoints(p: Vector[], tgt?: Vector)
 {
     const dim = p.length;
     const v0 = p[0];
@@ -226,16 +226,8 @@ export function hyperplaneFromPoints(p: Vector[], centroid: Vector, tgt?: Vector
     // calculate normal for hyperplane
     generalizedCross(vecs, tgt);
 
-    normalize(tgt, 3);
-
-    // calculate offset
     tgt[dim] = -dot(v0, tgt, dim);
-
-    if (signedDistToPlane(centroid, tgt, dim) > 0) {
-        for (let i = 0; i < dim; ++i) {
-            tgt[i] = -tgt[i];
-        }
-    }
+    normalizePlane(tgt);
 
     return tgt;
 }

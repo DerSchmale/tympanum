@@ -43,7 +43,7 @@ export declare function getSquareMatrix(dim: number): Vector[];
  *
  * @ignore
  */
-export declare function hyperplaneFromPoints(p: Vector[], centroid: Vector, tgt?: Vector): Vector;
+export declare function hyperplaneFromPoints(p: Vector[], tgt?: Vector): Vector;
 /**
  * Flips a vector.
  *

@@ -28,19 +28,19 @@ var TYMP = (function (exports) {
         return d;
     }
     /**
-     * Normalizes a vector.
+     * Normalizes a plane encoded as a vector as (normal, offset).
      *
      * @ignore
      */
-    function normalize(v, dim) {
-        dim = dim !== null && dim !== void 0 ? dim : v.length;
+    function normalizePlane(v) {
+        var len = v.length;
         var d = v[0] * v[0];
-        for (var i = 1; i < dim; ++i)
+        for (var i = 1; i < len - 1; ++i)
             d += v[i] * v[i];
         if (d === 0.0)
             return v;
         d = 1.0 / Math.sqrt(d);
-        for (var i = 0; i < dim; ++i)
+        for (var i = 0; i < len; ++i)
             v[i] *= d;
         return v;
     }
@@ -152,7 +152,7 @@ var TYMP = (function (exports) {
      *
      * @ignore
      */
-    function hyperplaneFromPoints(p, centroid, tgt) {
+    function hyperplaneFromPoints(p, tgt) {
         var dim = p.length;
         var v0 = p[0];
         var vecs = [];
@@ -166,14 +166,8 @@ var TYMP = (function (exports) {
         }
         // calculate normal for hyperplane
         generalizedCross(vecs, tgt);
-        normalize(tgt, 3);
-        // calculate offset
         tgt[dim] = -dot(v0, tgt, dim);
-        if (signedDistToPlane(centroid, tgt, dim) > 0) {
-            for (var i = 0; i < dim; ++i) {
-                tgt[i] = -tgt[i];
-            }
-        }
+        normalizePlane(tgt);
         return tgt;
     }
     /**
@@ -336,8 +330,11 @@ var TYMP = (function (exports) {
          * The plane containing the ridge. Once created it remains cached.
          */
         Ridge.prototype.getPlane = function (points, centroid) {
-            if (!this._plane)
-                this._plane = hyperplaneFromPoints(this.verts.map(function (i) { return points[i]; }), centroid);
+            if (!this._plane) {
+                this._plane = hyperplaneFromPoints(this.verts.map(function (i) { return points[i]; }));
+                if (signedDistToPlane(centroid, this._plane))
+                    negate(this._plane);
+            }
             return this._plane;
         };
         return Ridge;

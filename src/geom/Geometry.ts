@@ -52,8 +52,11 @@ export class Ridge
      */
     getPlane(points:Vector[], centroid: Vector): Vector
     {
-        if (!this._plane)
-            this._plane = hyperplaneFromPoints(this.verts.map(i => points[i]), centroid);
+        if (!this._plane) {
+            this._plane = hyperplaneFromPoints(this.verts.map(i => points[i]));
+            if (signedDistToPlane(centroid, this._plane))
+                negate(this._plane)
+        }
 
         return this._plane;
     }
