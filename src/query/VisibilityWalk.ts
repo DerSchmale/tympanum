@@ -64,7 +64,7 @@ function walk(position: Vector, facet: Facet, points: Vector[], centroid: Vector
     let minT = 1.0;
 
     for (let r of facet.ridges) {
-        const t = intersectRayPlane(centroid, dir, r.getPlane(points), dim, true);
+        const t = intersectRayPlane(centroid, dir, r.getPlane(points, centroid), dim, true);
 
         // intersection did not occur on the segment, or it's not the furthest
         if (t > -EPSILON && t <= minT) {

@@ -28,19 +28,19 @@ var TYMP = (function (exports) {
         return d;
     }
     /**
-     * Normalizes a plane encoded as a vector as (normal, offset).
+     * Normalizes a vector.
      *
      * @ignore
      */
-    function normalizePlane(v) {
-        var len = v.length;
+    function normalize(v, dim) {
+        dim = dim !== null && dim !== void 0 ? dim : v.length;
         var d = v[0] * v[0];
-        for (var i = 1; i < len - 1; ++i)
+        for (var i = 1; i < dim; ++i)
             d += v[i] * v[i];
         if (d === 0.0)
             return v;
         d = 1.0 / Math.sqrt(d);
-        for (var i = 0; i < len; ++i)
+        for (var i = 0; i < dim; ++i)
             v[i] *= d;
         return v;
     }
@@ -152,7 +152,7 @@ var TYMP = (function (exports) {
      *
      * @ignore
      */
-    function hyperplaneFromPoints(p, tgt) {
+    function hyperplaneFromPoints(p, centroid, tgt) {
         var dim = p.length;
         var v0 = p[0];
         var vecs = [];
@@ -166,9 +166,14 @@ var TYMP = (function (exports) {
         }
         // calculate normal for hyperplane
         generalizedCross(vecs, tgt);
+        normalize(tgt, 3);
         // calculate offset
         tgt[dim] = -dot(v0, tgt, dim);
-        normalizePlane(tgt);
+        if (signedDistToPlane(centroid, tgt, dim) > 0) {
+            for (var i = 0; i < dim; ++i) {
+                tgt[i] = -tgt[i];
+            }
+        }
         return tgt;
     }
     /**
@@ -219,6 +224,11 @@ var TYMP = (function (exports) {
         }
         return -1;
     }
+    /**
+     * Calculates the adjoint of a matrix
+     *
+     * @ignore
+     */
     function adjointMatrix(mtx, tgt, dim) {
         if (dim === 1)
             return [[1]];
@@ -234,7 +244,10 @@ var TYMP = (function (exports) {
         }
         return tgt;
     }
-    // this happens in place?
+    /**
+     * Calculates the inverse of a matrix
+     * @ignore
+     */
     function invertMatrix(mtx, dim) {
         // custom cases for efficiency
         if (dim === 2) {
@@ -284,6 +297,9 @@ var TYMP = (function (exports) {
         }
         return mtx;
     }
+    /**
+     * @ignore
+     */
     function transformVector(mtx, p, tgt, dim) {
         for (var i = 0; i < dim; ++i) {
             tgt[i] = 0;
@@ -319,9 +335,9 @@ var TYMP = (function (exports) {
         /**
          * The plane containing the ridge. Once created it remains cached.
          */
-        Ridge.prototype.getPlane = function (points) {
+        Ridge.prototype.getPlane = function (points, centroid) {
             if (!this._plane)
-                this._plane = hyperplaneFromPoints(this.verts.map(function (i) { return points[i]; }));
+                this._plane = hyperplaneFromPoints(this.verts.map(function (i) { return points[i]; }), centroid);
             return this._plane;
         };
         return Ridge;
@@ -874,7 +890,13 @@ var TYMP = (function (exports) {
         });
     }
 
+    /**
+     * @ignore
+     */
     var mtxCache = [];
+    /**
+     * @ignore
+     */
     var tmpCache = [];
     /**
      * Calculates the barycentric coordinates for a given point and a Facet. Every element of the coordinate is the
@@ -883,6 +905,8 @@ var TYMP = (function (exports) {
      * @param facet The Facet relative to which the coords are calculated.
      * @param points The points array indexed by Facet.
      * @param tgt An optional target to store the results. For dimension N, must be of length N+1.
+     *
+     * @author derschmale <http://www.derschmale.com>
      */
     function barycentricCoords(position, facet, points, tgt) {
         var d = dim(position);
@@ -965,7 +989,7 @@ var TYMP = (function (exports) {
         var minT = 1.0;
         for (var _i = 0, _a = facet.ridges; _i < _a.length; _i++) {
             var r = _a[_i];
-            var t = intersectRayPlane(centroid, dir, r.getPlane(points), dim, true);
+            var t = intersectRayPlane(centroid, dir, r.getPlane(points, centroid), dim, true);
             // intersection did not occur on the segment, or it's not the furthest
             if (t > -EPSILON && t <= minT) {
                 minT = t;

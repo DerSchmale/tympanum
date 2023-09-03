@@ -20,7 +20,7 @@ export declare function dot(v1: Vector, v2: Vector, dim?: number): number;
  *
  * @ignore
  */
-export declare function normalize(v: Vector): Vector;
+export declare function normalize(v: Vector, dim?: number): Vector;
 /**
  * Normalizes a plane encoded as a vector as (normal, offset).
  *
@@ -43,7 +43,7 @@ export declare function getSquareMatrix(dim: number): Vector[];
  *
  * @ignore
  */
-export declare function hyperplaneFromPoints(p: Vector[], tgt?: Vector): Vector;
+export declare function hyperplaneFromPoints(p: Vector[], centroid: Vector, tgt?: Vector): Vector;
 /**
  * Flips a vector.
  *
@@ -69,5 +69,12 @@ export declare function signedDistToPlane(point: Vector, plane: Vector, dim?: nu
  * @ignore
  */
 export declare function intersectRayPlane(origin: Vector, dir: Vector, plane: Vector, dim: number, startsInside?: boolean): number;
+/**
+ * Calculates the inverse of a matrix
+ * @ignore
+ */
 export declare function invertMatrix(mtx: Vector[], dim: number): Vector[];
+/**
+ * @ignore
+ */
 export declare function transformVector(mtx: Vector[], p: Vector, tgt: Vector, dim: number): Vector;

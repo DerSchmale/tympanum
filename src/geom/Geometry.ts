@@ -50,10 +50,10 @@ export class Ridge
     /**
      * The plane containing the ridge. Once created it remains cached.
      */
-    getPlane(points:Vector[]): Vector
+    getPlane(points:Vector[], centroid: Vector): Vector
     {
         if (!this._plane)
-            this._plane = hyperplaneFromPoints(this.verts.map(i => points[i]));
+            this._plane = hyperplaneFromPoints(this.verts.map(i => points[i]), centroid);
 
         return this._plane;
     }
