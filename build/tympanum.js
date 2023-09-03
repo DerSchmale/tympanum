@@ -839,6 +839,8 @@ var TYMP = (function (exports) {
         var arr = new ArrayBuffer((numPoints + 1) * byteSize); // add room for one upper bound
         var i = 0;
         var bound = 0;
+        var min = points[0].slice();
+        var max = points[0].slice();
         var lifted = points.map(function (p) {
             var f = new Float32Array(arr, i, liftedDim);
             var s = 0;
@@ -846,6 +848,10 @@ var TYMP = (function (exports) {
                 var e = p[j];
                 // the random factor is cheating, but it seems to solve some precision errors if everything is on a grid
                 f[j] = e;
+                if (e < min[j])
+                    min[j] = e;
+                if (e > max[j])
+                    max[j] = e;
                 s += e * e;
             }
             f[d] = s;
@@ -857,9 +863,9 @@ var TYMP = (function (exports) {
         // add a bounding point to increase robustness, will be filtered out on plane side test
         var boundPt = new Float32Array(arr, numPoints * byteSize, liftedDim);
         for (var i_1 = 0; i_1 < d; ++i_1) {
-            boundPt[i_1] = 0;
+            boundPt[i_1] = (min[i_1] + max[i_1]) * .5;
         }
-        boundPt[d] = bound * 10.0;
+        boundPt[d] = bound;
         lifted.push(boundPt);
         return lifted;
     }
@@ -871,7 +877,8 @@ var TYMP = (function (exports) {
      */
     function delaunay(points) {
         var d = dim(points[0]);
-        if (points.length === d + 1) {
+        var numPoints = points.length;
+        if (numPoints === d + 1) {
             return quickHull(points);
         }
         var lifted = lift(points, d);
@@ -986,12 +993,12 @@ var TYMP = (function (exports) {
         // using the centroid makes things easier, as the ray starting from the centroid hits the triangle face for
         // which the intersection distance is closest, so test for minT rather than doing barycentric tests.
         var hit = null;
-        var minT = 1.0;
+        var minT = 1.0 - EPSILON;
         for (var _i = 0, _a = facet.ridges; _i < _a.length; _i++) {
             var r = _a[_i];
             var t = intersectRayPlane(centroid, dir, r.getPlane(points, centroid), dim, true);
             // intersection did not occur on the segment, or it's not the furthest
-            if (t > -EPSILON && t <= minT) {
+            if (t > EPSILON && t <= minT) {
                 minT = t;
                 hit = r;
             }
