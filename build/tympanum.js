@@ -332,7 +332,7 @@ var TYMP = (function (exports) {
         Ridge.prototype.getPlane = function (points, centroid) {
             if (!this._plane) {
                 this._plane = hyperplaneFromPoints(this.verts.map(function (i) { return points[i]; }));
-                if (signedDistToPlane(centroid, this._plane))
+                if (signedDistToPlane(centroid, this._plane) > 0.0)
                     negate(this._plane);
             }
             return this._plane;
